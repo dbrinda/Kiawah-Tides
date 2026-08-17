@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>Kiawah Tides</title>
+
+<meta name="theme-color" content="#0B0D0F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kiawah Tides">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #0B0D0F;
+    --card: #14171A;
+    --card-2: #191D21;
+    --line: #23282d;
+    --gold: #C8A84A;
+    --gold-dim: #8f7736;
+    --water: #4FA8C9;
+    --water-dim: rgba(79,168,201,0.28);
+    --low: #7FA0AE;
+    --text: #EDEAE2;
+    --text-dim: #9AA0A6;
+    --danger: #C96A4F;
+  }
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html{
+    background:var(--bg);
+    min-height:100%;
+  }
+  body{
+    margin:0; padding:0; background:var(--bg); color:var(--text);
+    font-family:'IBM Plex Mono', monospace;
+    min-height:100vh;
+    min-height:100dvh;
+    overscroll-behavior-y: none;
+  }
+  h1,h2,h3,.display{
+    font-family:'Oswald', sans-serif;
+    letter-spacing:0.02em;
+    margin:0;
+  }
+  .app{
+    max-width: 640px;
+    margin: 0 auto;
+    padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 24px) 16px;
+    min-height: 100%;
+  }
+  /* Header */
+  header{
+    padding: 18px 2px 10px 2px;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .eyebrow{
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold); font-weight:600;
+  }
+  h1{
+    font-size: 30px; font-weight:700; color: var(--text);
+    text-transform: uppercase;
+  }
+  .station-line{
+    font-size: 12px; color: var(--text-dim); margin-top:2px;
+  }
+  .station-line a{ color: var(--text-dim); }
+
+  /* offline banner */
+  #offline-banner{
+    display:none;
+    background: #2a2117; color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  #offline-banner.show{ display:block; }
+
+  /* Date strip */
+  .date-nav{
+    display:flex; align-items:center; gap:8px;
+    margin-top: 14px;
+  }
+  .nav-btn{
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--gold);
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 18px;
+    flex-shrink:0;
+    user-select:none;
+  }
+  .nav-btn:active{ background: var(--card-2); }
+  .chip-scroll{
+    flex:1;
+    overflow-x:auto;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  .chip-scroll::-webkit-scrollbar{ display:none; }
+  .chip-row{
+    display:flex; gap:8px; padding: 2px 2px;
+  }
+  .chip{
+    flex-shrink:0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 6px 12px;
+    text-align:center;
+    min-width: 56px;
+    cursor:pointer;
+  }
+  .chip .d1{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; }
+  .chip .d2{ font-size:15px; color:var(--text); font-weight:600; font-family:'Oswald',sans-serif; }
+  .chip.active{
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .chip.active .d1{ color:#3a2f10; }
+  .chip.active .d2{ color:#1a1608; }
+
+  .date-heading{
+    margin-top:16px;
+    display:flex; align-items:baseline; justify-content:space-between;
+  }
+  .date-heading h2{
+    font-size:20px; color:var(--text); text-transform:uppercase; font-weight:600;
+  }
+  .today-pill{
+    font-size: 10px; letter-spacing:0.1em; text-transform:uppercase;
+    color: var(--bg); background: var(--water);
+    padding: 3px 8px; border-radius: 20px; font-weight:600;
+  }
+
+  /* Now readout */
+  .now-readout{
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .now-readout b{ color: var(--gold); font-weight:600; }
+  .trend-up::before{ content:"▲ "; color: var(--gold); }
+  .trend-down::before{ content:"▼ "; color: var(--water); }
+
+  /* Chart card */
+  .card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 10px 10px 4px;
+    margin-top: 14px;
+  }
+  #chart-wrap{
+    width:100%;
+    position:relative;
+  }
+  svg{ width:100%; height:auto; display:block; }
+  .axis-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 10px;
+    fill: var(--text-dim);
+  }
+  .grid-line{ stroke: var(--line); stroke-width:1; }
+  .now-line{ stroke: var(--gold); stroke-width:1; stroke-dasharray: 3 3; opacity:0.85; }
+  .hilo-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight:600;
+  }
+  .hilo-label.high{ fill: var(--gold); }
+  .hilo-label.low{ fill: var(--water); }
+
+  .loading, .error-msg{
+    padding: 40px 10px;
+    text-align:center;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  .error-msg{ color: var(--danger); }
+
+  /* Hi/Lo list */
+  .hilo-list{
+    margin-top: 14px;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .hilo-row{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .hilo-row .tag{
+    display:flex; align-items:center; gap:8px;
+    font-size: 13px; font-weight:600;
+  }
+  .hilo-row .tag .dot{
+    width:9px; height:9px; border-radius:50%;
+  }
+  .hilo-row.high .dot{ background: var(--gold); }
+  .hilo-row.low .dot{ background: var(--water); }
+  .hilo-row .tag-text.high{ color: var(--gold); }
+  .hilo-row .tag-text.low{ color: var(--water); }
+  .hilo-row .time{ font-size: 14px; color: var(--text); }
+  .hilo-row .ht{ font-size: 13px; color: var(--text-dim); }
+
+  /* Tips */
+  .tips{
+    margin-top: 18px;
+    background: var(--card-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .tips h3{
+    font-size: 13px; text-transform:uppercase; letter-spacing:0.08em;
+    color: var(--gold); font-weight:600; margin-bottom:8px;
+  }
+  .tips p{
+    margin: 0 0 8px 0;
+    font-size: 12.5px; line-height:1.55; color: var(--text-dim);
+  }
+  .tips p:last-child{ margin-bottom:0; }
+
+  footer{
+    margin-top: 20px;
+    text-align:center;
+    font-size: 10.5px;
+    color: #5b6167;
+    line-height:1.6;
+  }
+  footer a{ color: #7a828a; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="eyebrow">Joyful Echo · Field Conditions</div>
+    <h1>Kiawah Tides</h1>
+    <div class="station-line">Kiawah River Bridge, SC · Station 8667062 · computed from Charleston Harbor (8665530) using NOAA's published offsets</div>
+  </header>
+
+  <div id="offline-banner">Offline — showing cached tide data.</div>
+
+  <div class="date-nav">
+    <div class="nav-btn" id="prev-btn" aria-label="Previous day">‹</div>
+    <div class="chip-scroll" id="chip-scroll">
+      <div class="chip-row" id="chip-row"></div>
+    </div>
+    <div class="nav-btn" id="next-btn" aria-label="Next day">›</div>
+  </div>
+
+  <div class="date-heading">
+    <h2 id="date-heading-text">—</h2>
+    <span class="today-pill" id="today-pill" style="display:none;">Today</span>
+  </div>
+  <div class="now-readout" id="now-readout"></div>
+
+  <div class="card">
+    <div id="chart-wrap">
+      <div class="loading" id="chart-status">Loading tide predictions…</div>
+    </div>
+  </div>
+
+  <div class="hilo-list" id="hilo-list"></div>
+
+  <div class="tips">
+    <h3>Planning notes</h3>
+    <p>For kayaking the tidal creeks around Kiawah, plan to launch on a rising tide and return near or after high slack — you'll ride the current out and avoid getting stuck on exposed mudflats at low water.</p>
+    <p>For beach biking, low tide exposes the widest band of hard-packed sand — the two to three hours around low tide are usually easiest for riding.</p>
+  </div>
+
+  <footer>
+    Predictions from NOAA CO-OPS (tidesandcurrents.noaa.gov). Kiawah River Bridge (8667062) is a subordinate
+    station, so times/heights are computed from the Charleston Harbor (8665530) reference curve using NOAA's
+    published offset (+14 min / ×1.07 at high tide, +6 min / ×0.89 at low tide).<br>
+    Preliminary data, not verified for navigation. Cached for offline viewing after your first visit each day.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  // Kiawah River Bridge (8667062) is a *subordinate* station: NOAA doesn't
+  // hold harmonic constants for it, so the predictions API can't generate a
+  // curve directly for that ID. NOAA instead derives it by applying fixed
+  // time/height offsets to the nearby harmonic reference station, Charleston
+  // Harbor (8665530) — the same offsets published on NOAA's site for 8667062.
+  // We do the same shift here client-side.
+  const REF_STATION = '8665530'; // Charleston Harbor, Cooper River Entrance
+  const OFFSET = {
+    H: { minutes: 14, ratio: 1.07 },
+    L: { minutes: 6, ratio: 0.89 }
+  };
+  const API = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
+  const TZ = 'America/New_York';
+  const MIN_OFFSET = -7;
+  const MAX_OFFSET = 7;
+
+  let state = {
+    offset: 0,
+    dataCache: {} // dateStr -> {hilo, curve}
+  };
+
+  // ---------- date helpers (all anchored to Eastern time, DST-safe) ----------
+  function easternParts(d){
+    const fmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: TZ, year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+    });
+    const parts = {};
+    fmt.formatToParts(d).forEach(p => parts[p.type] = p.value);
+    return {
+      y: +parts.year, m: +parts.month, d: +parts.day,
+      hh: parts.hour === '24' ? 0 : +parts.hour, mm: +parts.minute, ss: +parts.second
+    };
+  }
+
+  function todayAnchor(){
+    const p = easternParts(new Date());
+    return { y: p.y, m: p.m, d: p.d };
+  }
+
+  function addDaysToAnchor(anchor, offset){
+    // noon UTC anchor avoids any DST edge issues when adding whole days
+    const base = Date.UTC(anchor.y, anchor.m - 1, anchor.d, 12, 0, 0);
+    const shifted = new Date(base + offset * 86400000);
+    const p = easternParts(shifted);
+    return { y: p.y, m: p.m, d: p.d };
+  }
+
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function dateKey(dp){ return `${dp.y}${pad2(dp.m)}${pad2(dp.d)}`; }
+  function weekdayShort(dp){
+    const wd = new Date(Date.UTC(dp.y, dp.m - 1, dp.d)).getUTCDay();
+    return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][wd];
+  }
+  function monthShort(dp){
+    const mo = dp.m - 1;
+    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][mo];
+  }
+  function sameDate(a,b){ return a.y===b.y && a.m===b.m && a.d===b.d; }
+
+  function fmtHour12(hh, mm){
+    const ampm = hh >= 12 ? 'PM' : 'AM';
+    let h = hh % 12; if (h === 0) h = 12;
+    return `${h}:${pad2(mm)} ${ampm}`;
+  }
+
+  // ---------- data fetching ----------
+  function buildUrl(beginStr, endStr, hilo){
+    const params = new URLSearchParams({
+      product: 'predictions',
+      application: 'joyfulecho_kiawah_tides',
+      begin_date: beginStr,
+      end_date: endStr,
+      datum: 'MLLW',
+      station: REF_STATION,
+      time_zone: 'lst_ldt',
+      units: 'english',
+      format: 'json'
+    });
+    if (hilo) params.set('interval', 'hilo');
+    return `${API}?${params.toString()}`;
+  }
+
+  // NOAA's API doesn't send CORS headers for third-party origins, so a direct
+  // browser fetch from a GitHub Pages domain gets blocked. Try direct first
+  // (in case that ever changes), then fall back to a public CORS proxy.
+  function proxyUrl(url){
+    return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+  }
+
+  async function fetchJson(url){
+    let lastErr;
+    for (const target of [url, proxyUrl(url)]){
+      try {
+        const res = await fetch(target);
+        if (!res.ok) throw new Error('Network error ' + res.status);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message || 'NOAA API error');
+        return data;
+      } catch (err){
+        lastErr = err;
+      }
+    }
+    throw lastErr;
+  }
+
+  // Parse raw NOAA points into { minutes: minutes-since-window-start, v, type }
+  function parseRawPoints(json, windowStartAnchor){
+    if (!json.predictions) return [];
+    return json.predictions.map(p => {
+      const [datePart, timePart] = p.t.split(' ');
+      const [y, m, d] = datePart.split('-').map(Number);
+      const [hh, mm] = timePart.split(':').map(Number);
+      const dayDiff = Math.round(
+        (Date.UTC(y, m - 1, d) - Date.UTC(windowStartAnchor.y, windowStartAnchor.m - 1, windowStartAnchor.d)) / 86400000
+      );
+      return {
+        minutes: dayDiff * 1440 + hh * 60 + mm,
+        v: parseFloat(p.v),
+        type: p.type || null
+      };
+    }).sort((a, b) => a.minutes - b.minutes);
+  }
+
+  // Apply the subordinate-station offset to a single hilo event.
+  function shiftExtremum(pt){
+    const off = OFFSET[pt.type] || OFFSET.H;
+    return { minutes: pt.minutes + off.minutes, v: pt.v * off.ratio, type: pt.type };
+  }
+
+  // Given a raw reference-curve point at `minutes`, interpolate the time-shift
+  // and height-ratio between the two bracketing reference extrema (so the
+  // resulting curve passes exactly through the shifted highs/lows and blends
+  // smoothly between them) and apply it.
+  function shiftCurvePoint(pt, refExtrema){
+    if (!refExtrema.length) return { minutes: pt.minutes, v: pt.v };
+    let a = null, b = null;
+    for (let i = 0; i < refExtrema.length; i++){
+      if (refExtrema[i].minutes <= pt.minutes) a = refExtrema[i];
+      if (refExtrema[i].minutes > pt.minutes && !b) b = refExtrema[i];
+    }
+    let offMin, ratio;
+    if (a && b){
+      const f = (pt.minutes - a.minutes) / (b.minutes - a.minutes || 1);
+      const offA = OFFSET[a.type] || OFFSET.H, offB = OFFSET[b.type] || OFFSET.H;
+      offMin = offA.minutes + f * (offB.minutes - offA.minutes);
+      ratio = offA.ratio + f * (offB.ratio - offA.ratio);
+    } else if (a){
+      offMin = OFFSET[a.type].minutes; ratio = OFFSET[a.type].ratio;
+    } else {
+      offMin = OFFSET[b.type].minutes; ratio = OFFSET[b.type].ratio;
+    }
+    return { minutes: pt.minutes + offMin, v: pt.v * ratio };
+  }
+
+  function minutesToParts(totalMinutes, windowStartAnchor){
+    const dayIndex = Math.floor(totalMinutes / 1440);
+    const minOfDay = totalMinutes - dayIndex * 1440;
+    const dp = addDaysToAnchor(windowStartAnchor, dayIndex);
+    return { dp, hh: Math.floor(minOfDay / 60), mm: Math.round(minOfDay % 60), minutesOfDay: minOfDay };
+  }
+
+  async function getDayData(dp){
+    const key = dateKey(dp);
+    if (state.dataCache[key]) return state.dataCache[key];
+
+    // Fetch a 3-day padded window from the reference station so shifted
+    // points near midnight still have data to draw from.
+    const windowStart = addDaysToAnchor(dp, -1);
+    const windowEnd = addDaysToAnchor(dp, 1);
+    const beginStr = dateKey(windowStart);
+    const endStr = dateKey(windowEnd);
+
+    const [hiloJson, curveJson] = await Promise.all([
+      fetchJson(buildUrl(beginStr, endStr, true)),
+      fetchJson(buildUrl(beginStr, endStr, false))
+    ]);
+
+    const refExtrema = parseRawPoints(hiloJson, windowStart);
+    const refCurve = parseRawPoints(curveJson, windowStart);
+
+    const shiftedHilo = refExtrema.map(shiftExtremum);
+    const shiftedCurve = refCurve.map(pt => shiftCurvePoint(pt, refExtrema));
+
+    function toTarget(list){
+      return list
+        .map(pt => {
+          const parts = minutesToParts(pt.minutes, windowStart);
+          return { dp: parts.dp, hh: parts.hh, mm: parts.mm, minutes: parts.minutesOfDay, v: pt.v, type: pt.type || null };
+        })
+        .filter(pt => sameDate(pt.dp, dp))
+        .sort((a, b) => a.minutes - b.minutes)
+        .map(({ dp: _dp, ...rest }) => rest);
+    }
+
+    const result = {
+      hilo: toTarget(shiftedHilo),
+      curve: toTarget(shiftedCurve)
+    };
+    state.dataCache[key] = result;
+    return result;
+  }
+
+  // ---------- rendering ----------
+  function renderChipRow(){
+    const anchor = todayAnchor();
+    const row = document.getElementById('chip-row');
+    row.innerHTML = '';
+    for (let off = -1; off <= 7; off++){
+      const dp = addDaysToAnchor(anchor, off);
+      const chip = document.createElement('div');
+      chip.className = 'chip' + (off === state.offset ? ' active' : '');
+      chip.innerHTML = `<div class="d1">${off === 0 ? 'Today' : weekdayShort(dp)}</div><div class="d2">${dp.d}</div>`;
+      chip.addEventListener('click', () => selectOffset(off));
+      chip.dataset.offset = off;
+      row.appendChild(chip);
+    }
+  }
+
+  function scrollActiveChipIntoView(){
+    const active = document.querySelector('.chip.active');
+    if (active) active.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+  }
+
+  function selectOffset(off){
+    if (off < MIN_OFFSET || off > MAX_OFFSET) return;
+    state.offset = off;
+    renderChipRow();
+    scrollActiveChipIntoView();
+    loadAndRender();
+  }
+
+  function setOnlineBanner(){
+    const banner = document.getElementById('offline-banner');
+    banner.classList.toggle('show', !navigator.onLine);
+  }
+
+  async function loadAndRender(){
+    const anchor = todayAnchor();
+    const dp = addDaysToAnchor(anchor, state.offset);
+    const isToday = sameDate(dp, anchor);
+
+    document.getElementById('date-heading-text').textContent =
+      `${weekdayShort(dp)}, ${monthShort(dp)} ${dp.d}`;
+    document.getElementById('today-pill').style.display = isToday ? 'inline-block' : 'none';
+    document.getElementById('now-readout').textContent = '';
+    document.getElementById('hilo-list').innerHTML = '';
+
+    const wrap = document.getElementById('chart-wrap');
+    wrap.innerHTML = '<div class="loading" id="chart-status">Loading tide predictions…</div>';
+
+    try {
+      const { hilo, curve } = await getDayData(dp);
+      setOnlineBanner();
+      renderChart(wrap, curve, hilo, isToday);
+      renderHiloList(hilo);
+      if (isToday) renderNowReadout(curve, hilo);
+    } catch (err){
+      setOnlineBanner();
+      wrap.innerHTML = `<div class="error-msg">Couldn't load tide data${navigator.onLine ? '' : ' (offline, and no cached copy for this day)'}.<br>${err.message}</div>`;
+    }
+  }
+
+  function nowMinutesEastern(){
+    const p = easternParts(new Date());
+    return p.hh * 60 + p.mm;
+  }
+
+  function interpolateAt(curve, minutes){
+    if (!curve.length) return null;
+    for (let i = 0; i < curve.length - 1; i++){
+      const a = curve[i], b = curve[i+1];
+      if (minutes >= a.minutes && minutes <= b.minutes){
+        const frac = (minutes - a.minutes) / (b.minutes - a.minutes || 1);
+        return a.v + (b.v - a.v) * frac;
+      }
+    }
+    return minutes < curve[0].minutes ? curve[0].v : curve[curve.length-1].v;
+  }
+
+  function renderNowReadout(curve, hilo){
+    const nowMin = nowMinutesEastern();
+    const val = interpolateAt(curve, nowMin);
+    const valBefore = interpolateAt(curve, Math.max(0, nowMin - 6));
+    const rising = val !== null && valBefore !== null ? val > valBefore : true;
+    const el = document.getElementById('now-readout');
+    if (val === null){ el.textContent = ''; return; }
+    el.innerHTML = `<span class="${rising ? 'trend-up' : 'trend-down'}">Now: <b>${val.toFixed(1)} ft</b> · ${rising ? 'rising' : 'falling'}</span>`;
+  }
+
+  function renderHiloList(hilo){
+    const list = document.getElementById('hilo-list');
+    list.innerHTML = '';
+    hilo.forEach(pt => {
+      const isHigh = pt.type === 'H';
+      const row = document.createElement('div');
+      row.className = 'hilo-row ' + (isHigh ? 'high' : 'low');
+      row.innerHTML = `
+        <div class="tag">
+          <span class="dot"></span>
+          <span class="tag-text ${isHigh ? 'high' : 'low'}">${isHigh ? 'HIGH' : 'LOW'}</span>
+        </div>
+        <div class="time">${fmtHour12(pt.hh, pt.mm)}</div>
+        <div class="ht">${pt.v.toFixed(1)} ft</div>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  function renderChart(wrap, curve, hilo, isToday){
+    if (!curve.length){
+      wrap.innerHTML = '<div class="loading">No data for this day.</div>';
+      return;
+    }
+    const W = 800, H = 300;
+    const marginLeft = 38, marginRight = 14, marginTop = 26, marginBottom = 26;
+    const plotW = W - marginLeft - marginRight;
+    const plotH = H - marginTop - marginBottom;
+
+    const values = curve.map(p => p.v);
+    let minV = Math.min(...values), maxV = Math.max(...values);
+    const pad = Math.max(0.4, (maxV - minV) * 0.15);
+    minV -= pad; maxV += pad;
+
+    const xForMin = m => marginLeft + (m / 1440) * plotW;
+    const yForVal = v => marginTop + plotH - ((v - minV) / (maxV - minV)) * plotH;
+
+    // smooth-ish path (dense 6-min points already look smooth as straight segments)
+    let d = '';
+    curve.forEach((p, i) => {
+      const x = xForMin(p.minutes), y = yForVal(p.v);
+      d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+    });
+    const areaD = d + `L${xForMin(curve[curve.length-1].minutes).toFixed(1)},${(marginTop+plotH).toFixed(1)} L${xForMin(curve[0].minutes).toFixed(1)},${(marginTop+plotH).toFixed(1)} Z`;
+
+    // gridlines: horizontal at nice foot steps
+    const range = maxV - minV;
+    const step = range > 8 ? 2 : (range > 4 ? 1 : 0.5);
+    const gridLines = [];
+    let gv = Math.ceil(minV / step) * step;
+    for (; gv <= maxV; gv += step){
+      gridLines.push(gv);
+    }
+
+    // vertical gridlines every 4 hours
+    const hourMarks = [0, 240, 480, 720, 960, 1200, 1440];
+    const hourLabels = ['12a','4a','8a','12p','4p','8p','12a'];
+
+    let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+    svg += `<defs><linearGradient id="waterFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(79,168,201,0.38)"/>
+      <stop offset="100%" stop-color="rgba(79,168,201,0.02)"/>
+    </linearGradient></defs>`;
+
+    // horizontal grid + labels
+    gridLines.forEach(v => {
+      const y = yForVal(v);
+      svg += `<line class="grid-line" x1="${marginLeft}" y1="${y.toFixed(1)}" x2="${W-marginRight}" y2="${y.toFixed(1)}"/>`;
+      svg += `<text class="axis-label" x="${marginLeft-6}" y="${(y+3).toFixed(1)}" text-anchor="end">${v.toFixed(1)}</text>`;
+    });
+
+    // vertical hour labels
+    hourMarks.forEach((m, i) => {
+      const x = xForMin(m);
+      svg += `<text class="axis-label" x="${x.toFixed(1)}" y="${H-8}" text-anchor="${i===0?'start':(i===hourMarks.length-1?'end':'middle')}">${hourLabels[i]}</text>`;
+    });
+
+    // water fill + line
+    svg += `<path d="${areaD}" fill="url(#waterFill)" stroke="none"/>`;
+    svg += `<path d="${d}" fill="none" stroke="#C8A84A" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+
+    // now line + dot
+    if (isToday){
+      const nowMin = nowMinutesEastern();
+      const nx = xForMin(nowMin);
+      const nv = interpolateAt(curve, nowMin);
+      svg += `<line class="now-line" x1="${nx.toFixed(1)}" y1="${marginTop}" x2="${nx.toFixed(1)}" y2="${marginTop+plotH}"/>`;
+      if (nv !== null){
+        const ny = yForVal(nv);
+        svg += `<circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="5" fill="#0B0D0F" stroke="#C8A84A" stroke-width="2.5"/>`;
+      }
+    }
+
+    // hi/lo markers
+    hilo.forEach(pt => {
+      const x = xForMin(pt.minutes), y = yForVal(pt.v);
+      const isHigh = pt.type === 'H';
+      svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="${isHigh ? '#C8A84A' : '#4FA8C9'}"/>`;
+      const labelY = isHigh ? y - 12 : y + 20;
+      const anchor = x < 60 ? 'start' : (x > W - 60 ? 'end' : 'middle');
+      svg += `<text class="hilo-label ${isHigh ? 'high' : 'low'}" x="${x.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="${anchor}">${fmtHour12(pt.hh, pt.mm)}</text>`;
+    });
+
+    svg += `</svg>`;
+    wrap.innerHTML = svg;
+  }
+
+  // ---------- init ----------
+  document.getElementById('prev-btn').addEventListener('click', () => selectOffset(state.offset - 1));
+  document.getElementById('next-btn').addEventListener('click', () => selectOffset(state.offset + 1));
+  window.addEventListener('online', setOnlineBanner);
+  window.addEventListener('offline', setOnlineBanner);
+
+  renderChipRow();
+  scrollActiveChipIntoView();
+  setOnlineBanner();
+  loadAndRender();
+
+  // refresh the "now" line every minute while the tab/app is open
+  setInterval(() => {
+    const anchor = todayAnchor();
+    const dp = addDaysToAnchor(anchor, state.offset);
+    if (sameDate(dp, anchor)){
+      loadAndRender();
+    }
+  }, 60000);
+
+  if ('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
