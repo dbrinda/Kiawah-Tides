@@ -31,8 +31,11 @@
     --text: #EDEAE2;
     --text-dim: #9AA0A6;
     --danger: #C96A4F;
+    --teal: #264956;
+    --teal-line: #3b6f80;
   }
   *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden]{ display:none !important; }
   html{
     background:var(--bg);
     min-height:100%;
@@ -49,29 +52,52 @@
     letter-spacing:0.02em;
     margin:0;
   }
+  button{ font-family:inherit; }
   .app{
     max-width: 640px;
     margin: 0 auto;
     padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 24px) 16px;
-    min-height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display:flex; flex-direction:column;
   }
-  /* Header */
-  header{
-    padding: 18px 2px 10px 2px;
-    display:flex; flex-direction:column; gap:2px;
+
+  /* ---------- Header ---------- */
+  .app-head{
+    position:relative;
+    display:flex; align-items:flex-start; gap:12px;
+    padding: 14px 2px 8px 2px;
   }
+  .logo{
+    width:68px; height:68px; flex-shrink:0; border-radius:50%;
+    display:block;
+  }
+  .head-text{ flex:1; min-width:0; }
   .eyebrow{
-    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
-    color: var(--gold); font-weight:600;
+    font-family:'Oswald', sans-serif;
+    font-size: 10.5px; letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--gold); font-weight:500; white-space:nowrap;
   }
   h1{
-    font-size: 30px; font-weight:700; color: var(--text);
-    text-transform: uppercase;
+    font-size: 27px; font-weight:600; color: var(--text);
+    line-height:1.12; margin-top:2px; padding-right:50px;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
   }
   .station-line{
-    font-size: 12px; color: var(--text-dim); margin-top:2px;
+    font-size: 11.5px; color: var(--text-dim); margin-top:4px; line-height:1.4;
   }
-  .station-line a{ color: var(--text-dim); }
+  .loc-btn{
+    position:absolute; top:14px; right:2px;
+    width:44px; height:44px; border-radius:12px;
+    background: rgba(38,73,86,0.35);
+    border:1.5px solid var(--teal-line);
+    color: var(--text);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; padding:0;
+  }
+  .loc-btn svg{ width:22px; height:22px; }
+  .loc-btn:active{ background: rgba(38,73,86,0.7); }
+  .loc-btn.active{ background: var(--teal); border-color: var(--text); }
 
   /* offline banner */
   #offline-banner{
@@ -85,10 +111,22 @@
   }
   #offline-banner.show{ display:block; }
 
-  /* Date strip */
+  /* ---------- Main view ---------- */
+  .date-heading{
+    margin-top:14px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .date-heading h2{
+    font-size:26px; color:var(--text); text-transform:uppercase; font-weight:600;
+  }
+  .today-pill{
+    font-size: 10px; letter-spacing:0.1em; text-transform:uppercase;
+    color: var(--bg); background: var(--water);
+    padding: 3px 8px; border-radius: 20px; font-weight:600;
+  }
   .date-nav{
     display:flex; align-items:center; gap:8px;
-    margin-top: 14px;
+    margin-top: 10px;
   }
   .nav-btn{
     background: var(--card);
@@ -131,24 +169,34 @@
   .chip.active .d1{ color:#3a2f10; }
   .chip.active .d2{ color:#1a1608; }
 
-  .date-heading{
-    margin-top:16px;
-    display:flex; align-items:baseline; justify-content:space-between;
+  /* section headings */
+  .sec-head{
+    display:flex; align-items:center; gap:10px;
+    margin: 24px 0 8px 0;
   }
-  .date-heading h2{
-    font-size:20px; color:var(--text); text-transform:uppercase; font-weight:600;
-  }
-  .today-pill{
-    font-size: 10px; letter-spacing:0.1em; text-transform:uppercase;
-    color: var(--bg); background: var(--water);
-    padding: 3px 8px; border-radius: 20px; font-weight:600;
-  }
+  .sec-head svg{ width:30px; height:30px; flex-shrink:0; color: var(--text);
+    fill:none; stroke: currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+  .sec-head h2{ font-size:26px; text-transform:uppercase; font-weight:600; color: var(--text); }
+  .sec-head .sec-note{ margin-left:auto; font-size:11px; color: var(--text-dim); text-align:right; }
+
+  /* weather icons */
+  svg.wx{ fill:none; stroke: currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* Temp */
+  .temp-row{ display:flex; justify-content:space-between; gap:2px; margin-top: 6px; }
+  .tcol{ flex:1; min-width:0; text-align:center; display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .tcol .tl{ font-size:12.5px; color: var(--text-dim); font-weight:500; letter-spacing:0.03em; }
+  .tcol svg.wx{ width:32px; height:32px; color: var(--text); }
+  .tcol .tv{ font-family:'Oswald',sans-serif; font-size:21px; color: var(--text); }
+  .tcol.now .tl, .tcol.now .tv{ color: var(--gold); }
+  .tcol.now .tl{ font-weight:600; }
 
   /* Now readout */
   .now-readout{
-    margin-top: 6px;
+    margin-top: 2px; margin-bottom: 2px;
     font-size: 13px;
     color: var(--text-dim);
+    min-height: 18px;
   }
   .now-readout b{ color: var(--gold); font-weight:600; }
   .trend-up::before{ content:"▲ "; color: var(--gold); }
@@ -160,7 +208,7 @@
     border: 1px solid var(--line);
     border-radius: 16px;
     padding: 14px 10px 10px 4px;
-    margin-top: 14px;
+    margin-top: 8px;
   }
   #chart-wrap{
     width:100%;
@@ -187,8 +235,13 @@
     text-align:center;
     color: var(--text-dim);
     font-size: 13px;
+    line-height:1.5;
   }
   .error-msg{ color: var(--danger); }
+  .retry-btn{
+    margin-top:10px; background: var(--card-2); color: var(--gold);
+    border:1px solid var(--line); border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;
+  }
 
   /* Hi/Lo list */
   .hilo-list{
@@ -218,21 +271,13 @@
 
   /* Wind */
   .wind{
-    margin-top: 18px;
+    margin-top: 24px;
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 16px;
-    padding: 14px 14px 12px 14px;
+    padding: 4px 14px 12px 14px;
   }
-  .wind-head{
-    display:flex; align-items:baseline; justify-content:space-between;
-    margin-bottom: 10px;
-  }
-  .wind-head h3{
-    font-size: 15px; text-transform:uppercase; letter-spacing:0.08em;
-    color: var(--gold); font-weight:600;
-  }
-  .wind-head .units{ font-size: 10.5px; color: var(--text-dim); }
+  .wind .sec-head{ margin-top: 12px; }
   .seg{
     display:flex; gap:6px; margin-bottom: 12px;
   }
@@ -272,26 +317,11 @@
   .wind-strip-scroll{
     margin-top: 14px;
     overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none;
-    /* soft fade at both edges so it reads as "swipe for more hours" */
     -webkit-mask-image: linear-gradient(to right, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
             mask-image: linear-gradient(to right, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
   }
   .wind-strip-scroll::-webkit-scrollbar{ display:none; }
   .wind-strip{ display:flex; gap:4px; padding: 4px 22px; width:max-content; }
-  .wind-map-btn{
-    width:100%; margin-top: 14px;
-    background: var(--card-2); border:1px solid var(--line); color: var(--gold);
-    border-radius: 10px; padding: 10px;
-    font-family:'IBM Plex Mono', monospace; font-size: 12.5px; cursor:pointer;
-  }
-  .wind-map-btn:active{ background: var(--card); }
-  .wind-map-box{ display:none; margin-top: 12px; }
-  .wind-map-box.show{ display:block; }
-  .wind-map-box iframe{
-    width:100%; height: 460px; border:0; border-radius: 12px; background:#0f1a24;
-  }
-  .wind-map-box .map-note{ margin-top:6px; font-size:10.5px; color: var(--text-dim); line-height:1.5; }
-  .wind-map-box .map-note a{ color: var(--text-dim); }
   .wcell{
     flex: 0 0 46px;
     background: var(--card-2);
@@ -314,6 +344,20 @@
   .wind-legend{
     margin-top: 8px; font-size: 10.5px; color: var(--text-dim); line-height:1.5;
   }
+  .wind-map-btn{
+    width:100%; margin-top: 14px;
+    background: var(--card-2); border:1px solid var(--line); color: var(--gold);
+    border-radius: 10px; padding: 10px;
+    font-family:'IBM Plex Mono', monospace; font-size: 12.5px; cursor:pointer;
+  }
+  .wind-map-btn:active{ background: var(--card); }
+  .wind-map-box{ display:none; margin-top: 12px; }
+  .wind-map-box.show{ display:block; }
+  .wind-map-box iframe{
+    width:100%; height: 460px; border:0; border-radius: 12px; background:#0f1a24;
+  }
+  .wind-map-box .map-note{ margin-top:6px; font-size:10.5px; color: var(--text-dim); line-height:1.5; }
+  .wind-map-box .map-note a{ color: var(--text-dim); }
 
   /* Tips */
   .tips{
@@ -341,168 +385,506 @@
     line-height:1.6;
   }
   footer a{ color: #7a828a; }
+
+  /* ---------- Choose Location view ---------- */
+  #view-loc{ flex:1; display:flex; flex-direction:column; min-height:0; }
+  .loc-list{ margin-top: 10px; }
+  .loc-row{
+    position:relative; overflow:hidden;
+    border-radius:16px; margin-bottom:10px;
+    max-height: 140px;
+    transition: max-height .22s ease, margin .22s ease, opacity .22s ease;
+  }
+  .loc-row.removing{ max-height:0; margin-bottom:0; opacity:0; }
+  .loc-del{
+    position:absolute; right:0; top:0; bottom:0; width:88px;
+    background: var(--danger); color:#fff; border:0;
+    font-size:13px; font-weight:600; cursor:pointer;
+    opacity:0; transition: opacity .12s;
+  }
+  .loc-row.open .loc-del, .loc-row.dragging .loc-del{ opacity:1; }
+  .loc-card{
+    position:relative;
+    background: var(--card); border:1px solid var(--line); border-radius:16px;
+    padding: 14px 16px;
+    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    touch-action: pan-y; user-select:none; -webkit-user-select:none;
+    transition: transform .2s ease, border-color .2s;
+    cursor:pointer;
+  }
+  .loc-row.open .loc-card{ transform: translateX(-88px); }
+  .loc-card.sel{ border-color: var(--gold-dim); }
+  .loc-card.flash{ border-color: var(--gold); box-shadow: 0 0 0 2px rgba(200,168,74,0.25); }
+  .loc-card:focus-visible{ outline:2px solid var(--water); outline-offset:2px; }
+  .loc-left{ min-width:0; }
+  .loc-name{
+    font-family:'Oswald',sans-serif; font-size:23px; font-weight:600; letter-spacing:0.01em;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .loc-sub{ margin-top:10px; display:flex; align-items:center; gap:8px; font-size:13px; color: var(--text-dim); }
+  .loc-sub svg.wx{ width:26px; height:26px; color: var(--text); flex-shrink:0; }
+  .loc-sub .bar{ width:1.5px; height:15px; background: var(--text-dim); opacity:.7; }
+  .loc-right{ text-align:right; flex-shrink:0; }
+  .loc-temp{ font-family:'Oswald',sans-serif; font-size:46px; line-height:1; font-weight:500; }
+  .loc-hl{ margin-top:6px; font-size:12px; color: var(--text-dim); white-space:nowrap; }
+  .loc-hl span + span{ margin-left:8px; }
+
+  .loc-results{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+  .loc-result{
+    background: var(--card); border:1px solid var(--line); border-radius:12px;
+    padding: 12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    color: var(--text); text-align:left; cursor:pointer; width:100%;
+  }
+  .loc-result:active{ background: var(--card-2); }
+  .loc-result .r-name{ font-family:'Oswald',sans-serif; font-size:19px; }
+  .loc-result .r-sub{ font-size:11.5px; color: var(--text-dim); margin-top:2px; }
+  .loc-result .r-add{ color: var(--gold); font-size:22px; line-height:1; flex-shrink:0; }
+  .loc-empty{ padding:30px 10px; text-align:center; color: var(--text-dim); font-size:13px; line-height:1.6; }
+
+  .loc-search{
+    margin-top:auto;
+    position:sticky; bottom: calc(env(safe-area-inset-bottom) + 10px);
+    padding-top: 14px;
+  }
+  .loc-search-inner{
+    display:flex; align-items:center; gap:10px;
+    background: #26292d; border:1px solid #33383d; border-radius:16px;
+    padding: 0 8px 0 14px; height:54px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.45);
+  }
+  .loc-search-inner > svg{ width:22px; height:22px; flex-shrink:0; color: var(--text-dim);
+    fill:none; stroke: currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .loc-search input{
+    flex:1; min-width:0; background:transparent; border:0; outline:0;
+    color: var(--text); font-family:'IBM Plex Mono',monospace; font-size:16px;
+  }
+  .loc-search input::placeholder{ color: var(--text-dim); }
+  .icon-btn{
+    flex-shrink:0; width:40px; height:40px; border-radius:12px; border:0; background:transparent;
+    color: var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0;
+  }
+  .icon-btn svg{ width:22px; height:22px; fill:none; stroke: currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .icon-btn:active{ background: rgba(255,255,255,.08); }
+  .icon-btn.here{ color: var(--water); }
+
+  .toast{
+    position:fixed; left:50%; bottom: calc(env(safe-area-inset-bottom) + 84px);
+    transform: translate(-50%, 10px); opacity:0; pointer-events:none;
+    background:#2b2f34; color: var(--text); border:1px solid #3a4046; border-radius:12px;
+    padding: 10px 14px; font-size:12.5px; max-width: 88vw; text-align:center;
+    transition: opacity .2s, transform .2s; z-index:50;
+  }
+  .toast.show{ opacity:1; transform: translate(-50%, 0); }
 </style>
 </head>
 <body>
 <div class="app">
 
-  <header>
-    <div class="eyebrow">Joyful Echo · Field Conditions</div>
-    <h1>Kiawah Tides</h1>
-    <div class="station-line">Kiawah River Bridge, SC · Station 8667062 · computed from Charleston Harbor (8665530) using NOAA's published offsets</div>
+  <header class="app-head">
+    <img class="logo" src="icons/logo.png" alt="Joyful Echo Adventures" width="68" height="68">
+    <div class="head-text">
+      <div class="eyebrow">Field Conditions • Wind &amp; Tides</div>
+      <h1 id="title">Kiawah Island, SC</h1>
+      <div class="station-line" id="station-line"></div>
+    </div>
+    <button class="loc-btn" id="loc-btn" type="button" aria-label="Choose location">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22s-7-6.1-7-12a7 7 0 1 1 14 0c0 5.9-7 12-7 12zm0-15.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill-rule="evenodd"/></svg>
+    </button>
   </header>
 
-  <div id="offline-banner">Offline — showing cached tide data.</div>
+  <div id="offline-banner">Offline — showing cached data where available.</div>
 
-  <div class="date-nav">
-    <div class="nav-btn" id="prev-btn" aria-label="Previous day">‹</div>
-    <div class="chip-scroll" id="chip-scroll">
-      <div class="chip-row" id="chip-row"></div>
+  <!-- ================= MAIN VIEW ================= -->
+  <main id="view-main">
+
+    <div class="date-heading">
+      <h2 id="date-heading-text">—</h2>
+      <span class="today-pill" id="today-pill" style="display:none;">Today</span>
     </div>
-    <div class="nav-btn" id="next-btn" aria-label="Next day">›</div>
-  </div>
 
-  <div class="date-heading">
-    <h2 id="date-heading-text">—</h2>
-    <span class="today-pill" id="today-pill" style="display:none;">Today</span>
-  </div>
-  <div class="now-readout" id="now-readout"></div>
-
-  <div class="card">
-    <div id="chart-wrap">
-      <div class="loading" id="chart-status">Loading tide predictions…</div>
+    <div class="date-nav">
+      <div class="nav-btn" id="prev-btn" aria-label="Previous day">‹</div>
+      <div class="chip-scroll" id="chip-scroll">
+        <div class="chip-row" id="chip-row"></div>
+      </div>
+      <div class="nav-btn" id="next-btn" aria-label="Next day">›</div>
     </div>
-  </div>
 
-  <div class="hilo-list" id="hilo-list"></div>
+    <section id="temp-section">
+      <div class="sec-head">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
+        <h2>Temp</h2>
+        <span class="sec-note" id="temp-hl"></span>
+      </div>
+      <div class="temp-row" id="temp-row"><div class="loading" style="width:100%;padding:18px 0">Loading…</div></div>
+    </section>
 
-  <section class="wind" id="wind-section">
-    <div class="wind-head">
-      <h3>Wind</h3>
-      <span class="units">mph · 10 m above ground</span>
+    <section id="tides-section">
+      <div class="sec-head">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 8.5c2.2-2 4.2-2 6.5 0s4.3 2 6.5 0 4.2-2 6 0M2.5 13.5c2.2-2 4.2-2 6.5 0s4.3 2 6.5 0 4.2-2 6 0M2.5 18.5c2.2-2 4.2-2 6.5 0s4.3 2 6.5 0 4.2-2 6 0"/></svg>
+        <h2>Tides</h2>
+      </div>
+      <div class="now-readout" id="now-readout"></div>
+      <div class="card">
+        <div id="chart-wrap">
+          <div class="loading" id="chart-status">Loading tide predictions…</div>
+        </div>
+      </div>
+      <div class="hilo-list" id="hilo-list"></div>
+    </section>
+
+    <section class="wind" id="wind-section">
+      <div class="sec-head">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.5h10.5a2.7 2.7 0 1 0-2.7-2.7M3 12.5h15.5a2.7 2.7 0 1 1-2.7 2.7M3 16.5h7"/></svg>
+        <h2>Wind</h2>
+        <span class="sec-note">mph · 10 m above ground</span>
+      </div>
+      <div class="seg" id="wind-seg">
+        <button type="button" data-win="am">Morning<small>7a–11a</small></button>
+        <button type="button" data-win="mid">Midday<small>11a–3p</small></button>
+        <button type="button" data-win="pm">Afternoon<small>3p–7p</small></button>
+      </div>
+      <div id="wind-summary"><div class="loading">Loading wind forecast…</div></div>
+      <div class="wind-strip-scroll"><div class="wind-strip" id="wind-strip"></div></div>
+      <div class="wind-legend">Swipe the hours sideways. Arrows point the way the wind is <b>blowing toward</b>. Gold-edged hours are in the window above. Blue ring marks the current hour.</div>
+      <button class="wind-map-btn" id="wind-map-btn" type="button">🌬️ Show animated wind map</button>
+      <div class="wind-map-box" id="wind-map-box"></div>
+    </section>
+
+    <div class="tips">
+      <h3>Planning notes</h3>
+      <p>For kayaking tidal creeks and estuaries, plan to launch on a rising tide and return near or after high slack — you'll ride the current out and avoid getting stuck on exposed mudflats at low water.</p>
+      <p>For beach biking, low tide exposes the widest band of hard-packed sand — the two to three hours around low tide are usually easiest for riding.</p>
+      <p>For wind, ride the exposed coast with the wind at your back, then loop inland — trees and buildings take the edge off a headwind on the way home.</p>
     </div>
-    <div class="seg" id="wind-seg">
-      <button data-win="am">Morning<small>7a–11a</small></button>
-      <button data-win="mid">Midday<small>11a–3p</small></button>
-      <button data-win="pm">Afternoon<small>3p–7p</small></button>
+
+    <footer>
+      <span id="foot-tide">Tide predictions from NOAA CO-OPS (tidesandcurrents.noaa.gov).</span><br>
+      Preliminary data, not verified for navigation. Cached for offline viewing after your first visit each day.<br>
+      Weather and wind forecast from <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0), a model forecast
+      for the selected location's grid point — local gusts and sea breezes can differ.
+    </footer>
+  </main>
+
+  <!-- ================= CHOOSE LOCATION VIEW ================= -->
+  <section id="view-loc" hidden>
+    <div class="loc-list" id="loc-list"></div>
+    <div class="loc-results" id="loc-results" hidden></div>
+
+    <div class="loc-search">
+      <div class="loc-search-inner">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.6-4.6"/></svg>
+        <input id="loc-q" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Search city or place" aria-label="Search for a city or place">
+        <button class="icon-btn" id="loc-clear" type="button" aria-label="Clear search" hidden>
+          <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <button class="icon-btn here" id="loc-here" type="button" aria-label="Use my current location">
+          <svg viewBox="0 0 24 24"><path d="M3.5 11.2L20.5 3.5l-7.7 17-1.9-7.4-7.4-1.9z"/></svg>
+        </button>
+      </div>
     </div>
-    <div id="wind-summary"><div class="loading">Loading wind forecast…</div></div>
-    <div class="wind-strip-scroll"><div class="wind-strip" id="wind-strip"></div></div>
-    <div class="wind-legend">Swipe the hours sideways. Arrows point the way the wind is <b>blowing toward</b>. Gold-edged hours are in the window above. Blue ring marks the current hour.</div>
-    <button class="wind-map-btn" id="wind-map-btn" type="button">🌬️ Show animated wind map</button>
-    <div class="wind-map-box" id="wind-map-box"></div>
   </section>
 
-  <div class="tips">
-    <h3>Planning notes</h3>
-    <p>For kayaking the tidal creeks around Kiawah, plan to launch on a rising tide and return near or after high slack — you'll ride the current out and avoid getting stuck on exposed mudflats at low water.</p>
-    <p>For beach biking, low tide exposes the widest band of hard-packed sand — the two to three hours around low tide are usually easiest for riding.</p>
-    <p>For wind, ride the exposed coast with the wind at your back, then loop inland — trees and buildings take the edge off a headwind on the way home.</p>
-  </div>
-
-  <footer>
-    Predictions from NOAA CO-OPS (tidesandcurrents.noaa.gov). Kiawah River Bridge (8667062) is a subordinate
-    station, so times/heights are computed from the Charleston Harbor (8665530) reference curve using NOAA's
-    published offset (+14 min / ×1.07 at high tide, +6 min / ×0.89 at low tide).<br>
-    Preliminary data, not verified for navigation. Cached for offline viewing after your first visit each day.<br>
-    Wind forecast from <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0), a model forecast for the
-    Kiawah Island grid point — local gusts and sea breezes can differ.
-  </footer>
-
 </div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function(){
-  // Kiawah River Bridge (8667062) is a *subordinate* station: NOAA doesn't
-  // hold harmonic constants for it, so the predictions API can't generate a
-  // curve directly for that ID. NOAA instead derives it by applying fixed
-  // time/height offsets to the nearby harmonic reference station, Charleston
-  // Harbor (8665530) — the same offsets published on NOAA's site for 8667062.
-  // We do the same shift here client-side.
-  const REF_STATION = '8665530'; // Charleston Harbor, Cooper River Entrance
-  const OFFSET = {
-    H: { minutes: 14, ratio: 1.07 },
-    L: { minutes: 6, ratio: 0.89 }
-  };
-  const API = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
-  const TZ = 'America/New_York';
+  'use strict';
+
+  // =====================================================================
+  //  Config
+  // =====================================================================
+  const NOAA_API = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
+  const NOAA_STATIONS = 'https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json?type=tidepredictions&units=english';
+  const METEO_API = 'https://api.open-meteo.com/v1/forecast';
+  const GEO_API = 'https://geocoding-api.open-meteo.com/v1/search';
+  const MAX_STATION_MI = 50;     // farthest NOAA tide station we'll borrow for a place
+  const FC_TTL = 30 * 60000;     // re-fetch forecasts after 30 minutes
   const MIN_OFFSET = -7;
   const MAX_OFFSET = 7;
+  const REVEAL = 88;             // px revealed by swiping a location card
 
-  let state = {
-    offset: 0,
-    dataCache: {} // dateStr -> {hilo, curve}
+  // Kiawah River Bridge (8667062) is a *subordinate* station: NOAA doesn't
+  // hold harmonic constants for it, so the predictions API can't generate a
+  // curve directly. NOAA derives it by applying fixed time/height offsets to
+  // the nearby harmonic reference station, Charleston Harbor (8665530). We do
+  // the same shift client-side. Any other station is used as-is.
+  const SUBORDINATE = {
+    '8667062': {
+      ref: '8665530',
+      refName: 'Charleston Harbor',
+      offset: { H: { minutes: 14, ratio: 1.07 }, L: { minutes: 6, ratio: 0.89 } }
+    }
   };
 
-  // ---------- date helpers (all anchored to Eastern time, DST-safe) ----------
-  function easternParts(d){
-    const fmt = new Intl.DateTimeFormat('en-US', {
-      timeZone: TZ, year:'numeric', month:'2-digit', day:'2-digit',
-      hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
-    });
+  // First-run presets (from the design mockup). Swipe to remove, search to add.
+  const DEFAULT_PRESETS = [
+    { id:'san-ramon', name:'San Ramon, CA', lat:37.78, lon:-121.98, tz:'America/Los_Angeles' },
+    { id:'kiawah', name:'Kiawah Island, SC', lat:32.608, lon:-80.085, tz:'America/New_York',
+      coast:60,   // rough bearing of the beach toward its NE end, for the beach-ride tip
+      tide:{ id:'8667062', name:'Kiawah River Bridge, SC', distMi:0 } },
+    { id:'campbell-river', name:'Campbell River, BC', lat:50.033, lon:-125.273, tz:'America/Vancouver' }
+  ];
+  const DEFAULT_SEL = 'kiawah';
+
+  const CARDINALS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  const WIND_WINDOWS = {
+    am:  { start: 7,  end: 11 },
+    mid: { start: 11, end: 15 },
+    pm:  { start: 15, end: 19 }
+  };
+  const STRIP_FIRST_HOUR = 5, STRIP_LAST_HOUR = 21;
+
+  const US_ST = {Alabama:'AL',Alaska:'AK',Arizona:'AZ',Arkansas:'AR',California:'CA',Colorado:'CO',Connecticut:'CT',Delaware:'DE','District of Columbia':'DC',Florida:'FL',Georgia:'GA',Hawaii:'HI',Idaho:'ID',Illinois:'IL',Indiana:'IN',Iowa:'IA',Kansas:'KS',Kentucky:'KY',Louisiana:'LA',Maine:'ME',Maryland:'MD',Massachusetts:'MA',Michigan:'MI',Minnesota:'MN',Mississippi:'MS',Missouri:'MO',Montana:'MT',Nebraska:'NE',Nevada:'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND',Ohio:'OH',Oklahoma:'OK',Oregon:'OR',Pennsylvania:'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD',Tennessee:'TN',Texas:'TX',Utah:'UT',Vermont:'VT',Virginia:'VA',Washington:'WA','West Virginia':'WV',Wisconsin:'WI',Wyoming:'WY'};
+  const CA_PR = {'British Columbia':'BC',Alberta:'AB',Saskatchewan:'SK',Manitoba:'MB',Ontario:'ON',Quebec:'QC','New Brunswick':'NB','Nova Scotia':'NS','Prince Edward Island':'PE','Newfoundland and Labrador':'NL',Yukon:'YT','Northwest Territories':'NT',Nunavut:'NU'};
+
+  // =====================================================================
+  //  Small helpers
+  // =====================================================================
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const pad2 = n => String(n).padStart(2, '0');
+  const DEVICE_TZ = (function(){
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York'; }
+    catch(e){ return 'America/New_York'; }
+  })();
+
+  const store = {
+    get(k, d){ try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+    set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  };
+
+  let toastTimer = null;
+  function toast(msg){
+    const el = $('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  // =====================================================================
+  //  State
+  // =====================================================================
+  let presets = store.get('kt.presets.v1', null);
+  if (!Array.isArray(presets) || !presets.length) presets = DEFAULT_PRESETS.map(p => JSON.parse(JSON.stringify(p)));
+  let selId = store.get('kt.sel.v1', DEFAULT_SEL);
+  if (!presets.some(p => p.id === selId)) selId = presets[0].id;
+
+  const state = {
+    view: 'main',
+    offset: 0,
+    dataCache: {},        // stationId:date -> {hilo, curve}
+    fc: {},               // presetId -> forecast
+    stations: null,       // [[id,name,state,lat,lng], ...]
+    windSel: null,
+    windShownKey: null,
+    tideShownKey: null
+  };
+  const inflight = {};
+
+  function savePresets(){ store.set('kt.presets.v1', presets); }
+  function loc(){ return presets.find(p => p.id === selId) || presets[0]; }
+  function curTZ(){ const p = loc(); return (p && p.tz) || DEVICE_TZ; }
+
+  // =====================================================================
+  //  Dates (all anchored to the *selected location's* time zone)
+  // =====================================================================
+  const fmtCache = {};
+  function tzParts(d, tz){
+    tz = tz || curTZ();
+    let f = fmtCache[tz];
+    if (!f){
+      try {
+        f = fmtCache[tz] = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit',
+          hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+        });
+      } catch(e){
+        f = fmtCache[tz] = new Intl.DateTimeFormat('en-US', {
+          year:'numeric', month:'2-digit', day:'2-digit',
+          hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+        });
+      }
+    }
     const parts = {};
-    fmt.formatToParts(d).forEach(p => parts[p.type] = p.value);
+    f.formatToParts(d).forEach(p => parts[p.type] = p.value);
     return {
       y: +parts.year, m: +parts.month, d: +parts.day,
       hh: parts.hour === '24' ? 0 : +parts.hour, mm: +parts.minute, ss: +parts.second
     };
   }
-
-  function todayAnchor(){
-    const p = easternParts(new Date());
-    return { y: p.y, m: p.m, d: p.d };
+  function todayAnchor(tz){ const p = tzParts(new Date(), tz); return { y: p.y, m: p.m, d: p.d }; }
+  // pure calendar arithmetic — no time zone involved, so it can't drift
+  function addDaysToAnchor(a, n){
+    const d = new Date(Date.UTC(a.y, a.m - 1, a.d + n));
+    return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() };
   }
-
-  function addDaysToAnchor(anchor, offset){
-    // noon UTC anchor avoids any DST edge issues when adding whole days
-    const base = Date.UTC(anchor.y, anchor.m - 1, anchor.d, 12, 0, 0);
-    const shifted = new Date(base + offset * 86400000);
-    const p = easternParts(shifted);
-    return { y: p.y, m: p.m, d: p.d };
-  }
-
-  function pad2(n){ return String(n).padStart(2,'0'); }
+  function selectedDay(){ return addDaysToAnchor(todayAnchor(), state.offset); }
   function dateKey(dp){ return `${dp.y}${pad2(dp.m)}${pad2(dp.d)}`; }
+  function isoDay(dp){ return `${dp.y}-${pad2(dp.m)}-${pad2(dp.d)}`; }
   function weekdayShort(dp){
     const wd = new Date(Date.UTC(dp.y, dp.m - 1, dp.d)).getUTCDay();
     return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][wd];
   }
   function monthShort(dp){
-    const mo = dp.m - 1;
-    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][mo];
+    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dp.m - 1];
   }
   function sameDate(a,b){ return a.y===b.y && a.m===b.m && a.d===b.d; }
-
   function fmtHour12(hh, mm){
     const ampm = hh >= 12 ? 'PM' : 'AM';
     let h = hh % 12; if (h === 0) h = 12;
     return `${h}:${pad2(mm)} ${ampm}`;
   }
+  function hourLabel(h){
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    return `${h12}${h >= 12 ? 'PM' : 'AM'}`;
+  }
+  function localClock(tz){
+    try {
+      return new Intl.DateTimeFormat('en-US', { timeZone: tz, hour:'numeric', minute:'2-digit' })
+        .format(new Date()).replace(/\s/g, '').toLowerCase();
+    } catch(e){ return ''; }
+  }
 
-  // ---------- data fetching ----------
-  function buildUrl(beginStr, endStr, hilo){
+  // =====================================================================
+  //  Weather icons + condition names (WMO codes from Open-Meteo)
+  // =====================================================================
+  const CLOUD = '<path d="M7.5 19h9.2a4 4 0 0 0 .6-7.95A5.6 5.6 0 0 0 6.6 9.9 4.6 4.6 0 0 0 7.5 19z"/>';
+  const CLOUD_LOW = '<path d="M10 20h7.2a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 9 12.6 3.8 3.8 0 0 0 10 20z"/>';
+  const CLOUD_HIGH = '<path d="M7.5 15h9.2a4 4 0 0 0 .6-7.95A5.6 5.6 0 0 0 6.6 5.9 4.6 4.6 0 0 0 7.5 15z"/>';
+  const WX = {
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/>',
+    moon: '<path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.2 8.2 0 1 0 10.2 10.2z"/>',
+    cloud: CLOUD,
+    partlyDay: '<circle cx="8.5" cy="8.5" r="3"/><path d="M8.5 2.6v1.2M2.6 8.5h1.2M4.3 4.3l.8.8M12.7 4.3l-.8.8"/>' + CLOUD_LOW,
+    partlyNight: '<path d="M11.8 3.4a4.9 4.9 0 1 0 5.2 6.4 4 4 0 0 1-5.2-6.4z"/>' + CLOUD_LOW,
+    fog: '<path d="M4 8.5h16M6 12.5h12M4 16.5h16M8 20.5h8"/>',
+    rain: CLOUD_HIGH + '<path d="M8.5 18l-1 3M12.5 18l-1 3M16.5 18l-1 3"/>',
+    snow: CLOUD_HIGH + '<path d="M8.5 18.5h.01M12.5 18.5h.01M16.5 18.5h.01M10.5 21.5h.01M14.5 21.5h.01" stroke-width="2.6"/>',
+    storm: CLOUD_HIGH + '<path d="M12.8 15.5l-2.6 3.6h3.4l-2 3.4"/>'
+  };
+  function wxInfo(code, isDay){
+    if (code == null) return { key:'cloud', label:'—' };
+    if (code <= 1) return isDay ? { key:'sun', label:'Sunny' } : { key:'moon', label:'Clear' };
+    if (code === 2) return { key: isDay ? 'partlyDay' : 'partlyNight', label:'Partly Cloudy' };
+    if (code === 3) return { key:'cloud', label:'Cloudy' };
+    if (code === 45 || code === 48) return { key:'fog', label:'Foggy' };
+    if (code >= 51 && code <= 57) return { key:'rain', label:'Drizzle' };
+    if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return { key:'rain', label:'Rainy' };
+    if ((code >= 71 && code <= 77) || code === 85 || code === 86) return { key:'snow', label:'Snowy' };
+    if (code >= 95) return { key:'storm', label:'Stormy' };
+    return { key:'cloud', label:'Cloudy' };
+  }
+  function wxIcon(code, isDay){
+    const info = wxInfo(code, isDay);
+    return `<svg class="wx" viewBox="0 0 24 24" aria-hidden="true">${WX[info.key]}</svg>`;
+  }
+
+  // =====================================================================
+  //  Forecast (Open-Meteo): temperature, conditions and wind in one request
+  // =====================================================================
+  function meteoUrl(p){
+    const q = new URLSearchParams({
+      latitude: p.lat,
+      longitude: p.lon,
+      hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
+      daily: 'temperature_2m_max,temperature_2m_min',
+      current: 'temperature_2m,weather_code,is_day',
+      temperature_unit: 'fahrenheit',
+      wind_speed_unit: 'mph',
+      timezone: 'auto',
+      past_days: 1,
+      forecast_days: 8
+    });
+    return METEO_API + '?' + q.toString();
+  }
+
+  function buildForecast(json){
+    if (json.error || !json.hourly) throw new Error(json.reason || 'Forecast service error');
+    const h = json.hourly, t = h.time;
+    const rows = [], windByDate = {};
+    for (let i = 0; i < t.length; i++){
+      const [date, tm] = t[i].split('T');
+      const r = {
+        date, h: +tm.slice(0, 2),
+        temp: h.temperature_2m ? h.temperature_2m[i] : null,
+        code: h.weather_code ? h.weather_code[i] : null,
+        isDay: h.is_day ? h.is_day[i] === 1 : true,
+        speed: h.wind_speed_10m ? h.wind_speed_10m[i] : null,
+        gust: h.wind_gusts_10m ? h.wind_gusts_10m[i] : null,
+        dir: h.wind_direction_10m ? h.wind_direction_10m[i] : null
+      };
+      rows.push(r);
+      if (r.speed != null && r.dir != null){
+        (windByDate[date] = windByDate[date] || []).push({
+          h: r.h, speed: r.speed, gust: r.gust == null ? r.speed : r.gust, dir: r.dir
+        });
+      }
+    }
+    const daily = {};
+    if (json.daily && json.daily.time){
+      json.daily.time.forEach((d, i) => {
+        daily[d] = { hi: json.daily.temperature_2m_max[i], lo: json.daily.temperature_2m_min[i] };
+      });
+    }
+    const c = json.current;
+    return {
+      at: Date.now(),
+      tz: json.timezone || null,
+      rows, windByDate, daily,
+      current: c ? { temp: c.temperature_2m, code: c.weather_code, isDay: c.is_day === 1 } : null
+    };
+  }
+
+  function getForecast(p){
+    const c = state.fc[p.id];
+    if (c && Date.now() - c.at < FC_TTL) return Promise.resolve(c);
+    if (inflight[p.id]) return inflight[p.id];
+    inflight[p.id] = (async () => {
+      try {
+        const res = await fetch(meteoUrl(p));
+        if (!res.ok) throw new Error('Forecast service error ' + res.status);
+        const fc = buildForecast(await res.json());
+        state.fc[p.id] = fc;
+        if (fc.tz && fc.tz !== p.tz){ p.tz = fc.tz; savePresets(); }
+        return fc;
+      } catch (err){
+        if (c) return c;           // stale beats nothing (offline, flaky network)
+        throw err;
+      } finally {
+        delete inflight[p.id];
+      }
+    })();
+    return inflight[p.id];
+  }
+
+  // =====================================================================
+  //  Tides (NOAA CO-OPS)
+  // =====================================================================
+  function buildUrl(station, beginStr, endStr, hilo){
     const params = new URLSearchParams({
       product: 'predictions',
       application: 'joyfulecho_kiawah_tides',
       begin_date: beginStr,
       end_date: endStr,
       datum: 'MLLW',
-      station: REF_STATION,
+      station: station,
       time_zone: 'lst_ldt',
       units: 'english',
       format: 'json'
     });
     if (hilo) params.set('interval', 'hilo');
-    return `${API}?${params.toString()}`;
+    return `${NOAA_API}?${params.toString()}`;
   }
 
   // NOAA's API doesn't send CORS headers for third-party origins, so a direct
-  // browser fetch from a GitHub Pages domain gets blocked. Try direct first
+  // browser fetch from a GitHub Pages domain can get blocked. Try direct first
   // (in case that ever changes), then fall back to a public CORS proxy.
   function proxyUrl(url){
     return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
   }
-
   async function fetchJson(url){
     let lastErr;
     for (const target of [url, proxyUrl(url)]){
@@ -519,7 +901,53 @@
     throw lastErr;
   }
 
-  // Parse raw NOAA points into { minutes: minutes-since-window-start, v, type }
+  // ---- nearest NOAA tide-prediction station to a place ----
+  async function getStations(){
+    if (state.stations) return state.stations;
+    const cached = store.get('kt.stations.v1', null);
+    if (cached && cached.list && cached.list.length && Date.now() - cached.at < 30 * 86400000){
+      state.stations = cached.list;
+      return state.stations;
+    }
+    const j = await fetchJson(NOAA_STATIONS);
+    const list = (j.stations || []).map(s => [
+      String(s.id), s.name || '', s.state || '',
+      +(s.lat != null ? s.lat : s.latitude), +(s.lng != null ? s.lng : (s.lon != null ? s.lon : s.longitude))
+    ]).filter(a => a[0] && isFinite(a[3]) && isFinite(a[4]));
+    if (!list.length) throw new Error('NOAA station list unavailable');
+    store.set('kt.stations.v1', { at: Date.now(), list });
+    state.stations = list;
+    return list;
+  }
+  function haversineMi(lat1, lon1, lat2, lon2){
+    const R = 3958.8, rad = Math.PI / 180;
+    const dLat = (lat2 - lat1) * rad, dLon = (lon2 - lon1) * rad;
+    const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1*rad) * Math.cos(lat2*rad) * Math.sin(dLon/2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+  // returns {id,name,distMi} or null when nothing is close enough
+  async function resolveTide(p){
+    if (p.tide) return p.tide.none ? null : p.tide;
+    const list = await getStations();
+    let best = null;
+    for (const s of list){
+      const d = haversineMi(p.lat, p.lon, s[3], s[4]);
+      if (!best || d < best.d) best = { s, d };
+    }
+    if (best && best.d <= MAX_STATION_MI){
+      p.tide = {
+        id: best.s[0],
+        name: best.s[1] + (best.s[2] ? ', ' + best.s[2] : ''),
+        distMi: Math.round(best.d)
+      };
+    } else {
+      p.tide = { none: true };
+    }
+    savePresets();
+    return p.tide.none ? null : p.tide;
+  }
+
+  // ---- raw NOAA points -> minutes since the window's first midnight ----
   function parseRawPoints(json, windowStartAnchor){
     if (!json.predictions) return [];
     return json.predictions.map(p => {
@@ -537,17 +965,15 @@
     }).sort((a, b) => a.minutes - b.minutes);
   }
 
-  // Apply the subordinate-station offset to a single hilo event.
-  function shiftExtremum(pt){
-    const off = OFFSET[pt.type] || OFFSET.H;
+  // Subordinate-station offsets.
+  function shiftExtremum(pt, OFF){
+    const off = OFF[pt.type] || OFF.H;
     return { minutes: pt.minutes + off.minutes, v: pt.v * off.ratio, type: pt.type };
   }
-
-  // Given a raw reference-curve point at `minutes`, interpolate the time-shift
-  // and height-ratio between the two bracketing reference extrema (so the
-  // resulting curve passes exactly through the shifted highs/lows and blends
-  // smoothly between them) and apply it.
-  function shiftCurvePoint(pt, refExtrema){
+  // Interpolate the time-shift and height-ratio between the two bracketing
+  // reference extrema so the curve passes exactly through the shifted
+  // highs/lows and blends smoothly between them.
+  function shiftCurvePoint(pt, refExtrema, OFF){
     if (!refExtrema.length) return { minutes: pt.minutes, v: pt.v };
     let a = null, b = null;
     for (let i = 0; i < refExtrema.length; i++){
@@ -557,17 +983,30 @@
     let offMin, ratio;
     if (a && b){
       const f = (pt.minutes - a.minutes) / (b.minutes - a.minutes || 1);
-      const offA = OFFSET[a.type] || OFFSET.H, offB = OFFSET[b.type] || OFFSET.H;
+      const offA = OFF[a.type] || OFF.H, offB = OFF[b.type] || OFF.H;
       offMin = offA.minutes + f * (offB.minutes - offA.minutes);
       ratio = offA.ratio + f * (offB.ratio - offA.ratio);
     } else if (a){
-      offMin = OFFSET[a.type].minutes; ratio = OFFSET[a.type].ratio;
+      offMin = (OFF[a.type] || OFF.H).minutes; ratio = (OFF[a.type] || OFF.H).ratio;
     } else {
-      offMin = OFFSET[b.type].minutes; ratio = OFFSET[b.type].ratio;
+      offMin = (OFF[b.type] || OFF.H).minutes; ratio = (OFF[b.type] || OFF.H).ratio;
     }
     return { minutes: pt.minutes + offMin, v: pt.v * ratio };
   }
-
+  // Some stations only publish highs/lows. Draw the usual half-cosine between them.
+  function synthCurve(ext){
+    const out = [];
+    for (let i = 0; i < ext.length - 1; i++){
+      const a = ext[i], b = ext[i + 1];
+      const span = b.minutes - a.minutes || 1;
+      for (let m = a.minutes; m < b.minutes; m += 6){
+        const f = (m - a.minutes) / span;
+        out.push({ minutes: m, v: a.v + (b.v - a.v) * (1 - Math.cos(Math.PI * f)) / 2 });
+      }
+    }
+    if (ext.length) out.push({ minutes: ext[ext.length - 1].minutes, v: ext[ext.length - 1].v });
+    return out;
+  }
   function minutesToParts(totalMinutes, windowStartAnchor){
     const dayIndex = Math.floor(totalMinutes / 1440);
     const minOfDay = totalMinutes - dayIndex * 1440;
@@ -575,27 +1014,37 @@
     return { dp, hh: Math.floor(minOfDay / 60), mm: Math.round(minOfDay % 60), minutesOfDay: minOfDay };
   }
 
-  async function getDayData(dp){
-    const key = dateKey(dp);
+  async function getDayData(src, dp){
+    const key = src.id + ':' + dateKey(dp);
     if (state.dataCache[key]) return state.dataCache[key];
 
-    // Fetch a 3-day padded window from the reference station so shifted
-    // points near midnight still have data to draw from.
+    // 3-day padded window so shifted points near midnight still have data.
     const windowStart = addDaysToAnchor(dp, -1);
     const windowEnd = addDaysToAnchor(dp, 1);
-    const beginStr = dateKey(windowStart);
-    const endStr = dateKey(windowEnd);
+    const beginStr = dateKey(windowStart), endStr = dateKey(windowEnd);
 
-    const [hiloJson, curveJson] = await Promise.all([
-      fetchJson(buildUrl(beginStr, endStr, true)),
-      fetchJson(buildUrl(beginStr, endStr, false))
-    ]);
-
-    const refExtrema = parseRawPoints(hiloJson, windowStart);
-    const refCurve = parseRawPoints(curveJson, windowStart);
-
-    const shiftedHilo = refExtrema.map(shiftExtremum);
-    const shiftedCurve = refCurve.map(pt => shiftCurvePoint(pt, refExtrema));
+    let extrema, curve;
+    const sub = SUBORDINATE[src.id];
+    if (sub){
+      const [hiloJson, curveJson] = await Promise.all([
+        fetchJson(buildUrl(sub.ref, beginStr, endStr, true)),
+        fetchJson(buildUrl(sub.ref, beginStr, endStr, false))
+      ]);
+      const refExtrema = parseRawPoints(hiloJson, windowStart);
+      const refCurve = parseRawPoints(curveJson, windowStart);
+      extrema = refExtrema.map(pt => shiftExtremum(pt, sub.offset));
+      curve = refCurve.map(pt => shiftCurvePoint(pt, refExtrema, sub.offset));
+    } else {
+      const hiloJson = await fetchJson(buildUrl(src.id, beginStr, endStr, true));
+      extrema = parseRawPoints(hiloJson, windowStart);
+      try {
+        const curveJson = await fetchJson(buildUrl(src.id, beginStr, endStr, false));
+        curve = parseRawPoints(curveJson, windowStart);
+      } catch (e){
+        curve = [];
+      }
+      if (curve.length < 20) curve = synthCurve(extrema);
+    }
 
     function toTarget(list){
       return list
@@ -607,19 +1056,34 @@
         .sort((a, b) => a.minutes - b.minutes)
         .map(({ dp: _dp, ...rest }) => rest);
     }
-
-    const result = {
-      hilo: toTarget(shiftedHilo),
-      curve: toTarget(shiftedCurve)
-    };
+    const result = { hilo: toTarget(extrema), curve: toTarget(curve) };
     state.dataCache[key] = result;
     return result;
   }
 
-  // ---------- rendering ----------
+  // =====================================================================
+  //  Rendering: header, chips
+  // =====================================================================
+  function setStationLine(text){ $('station-line').textContent = text || ''; }
+
+  function stationText(p, src){
+    if (!src) return `No NOAA tide station within ${MAX_STATION_MI} mi`;
+    const sub = SUBORDINATE[src.id];
+    if (sub) return `${src.name} • Station ${src.id} • Computed from ${sub.refName} (${sub.ref}) using NOAA's published offsets`;
+    return `${src.name} • Station ${src.id}` + (src.distMi >= 3 ? ` • ${src.distMi} mi away` : '');
+  }
+
+  function renderHeader(){
+    const inLoc = state.view === 'loc';
+    $('title').textContent = inLoc ? 'Choose Location' : loc().name;
+    $('station-line').hidden = inLoc;
+    $('loc-btn').classList.toggle('active', inLoc);
+    $('loc-btn').setAttribute('aria-label', inLoc ? 'Back to conditions' : 'Choose location');
+  }
+
   function renderChipRow(){
     const anchor = todayAnchor();
-    const row = document.getElementById('chip-row');
+    const row = $('chip-row');
     row.innerHTML = '';
     for (let off = -1; off <= 7; off++){
       const dp = addDaysToAnchor(anchor, off);
@@ -631,12 +1095,14 @@
       row.appendChild(chip);
     }
   }
-
   function scrollActiveChipIntoView(){
+    // horizontal only — never nudge the page itself
     const active = document.querySelector('.chip.active');
-    if (active) active.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+    const scroller = $('chip-scroll');
+    if (!active || !scroller) return;
+    const a = active.getBoundingClientRect(), s = scroller.getBoundingClientRect();
+    scroller.scrollLeft += (a.left + a.width / 2) - (s.left + s.width / 2);
   }
-
   function selectOffset(off){
     if (off < MIN_OFFSET || off > MAX_OFFSET) return;
     state.offset = off;
@@ -644,45 +1110,62 @@
     scrollActiveChipIntoView();
     loadAndRender();
   }
-
   function setOnlineBanner(){
-    const banner = document.getElementById('offline-banner');
-    banner.classList.toggle('show', !navigator.onLine);
+    $('offline-banner').classList.toggle('show', !navigator.onLine);
   }
 
-  async function loadAndRender(){
-    const anchor = todayAnchor();
-    const dp = addDaysToAnchor(anchor, state.offset);
-    const isToday = sameDate(dp, anchor);
-
-    document.getElementById('date-heading-text').textContent =
-      `${weekdayShort(dp)}, ${monthShort(dp)} ${dp.d}`;
-    document.getElementById('today-pill').style.display = isToday ? 'inline-block' : 'none';
-    document.getElementById('now-readout').textContent = '';
-    document.getElementById('hilo-list').innerHTML = '';
-
-    const wrap = document.getElementById('chart-wrap');
-    wrap.innerHTML = '<div class="loading" id="chart-status">Loading tide predictions…</div>';
-
-    renderWind(dp, isToday);   // independent of tides: one failing never hides the other
-
+  // =====================================================================
+  //  Rendering: Temp
+  // =====================================================================
+  async function renderTemp(p, dp, isToday){
+    const box = $('temp-row');
+    const key = isoDay(dp);
     try {
-      const { hilo, curve } = await getDayData(dp);
-      setOnlineBanner();
-      renderChart(wrap, curve, hilo, isToday);
-      renderHiloList(hilo);
-      if (isToday) renderNowReadout(curve, hilo);
+      const fc = await getForecast(p);
+      if (loc().id !== p.id || isoDay(selectedDay()) !== key) return;
+      let items = [];
+      if (isToday){
+        const nowH = tzParts(new Date(), p.tz).hh;
+        const idx = fc.rows.findIndex(r => r.date === key && r.h === nowH);
+        if (idx >= 0){
+          items = fc.rows.slice(idx, idx + 7).map((r, i) => ({
+            label: i === 0 ? 'NOW' : hourLabel(r.h),
+            temp: i === 0 && fc.current && fc.current.temp != null ? fc.current.temp : r.temp,
+            code: i === 0 && fc.current && fc.current.code != null ? fc.current.code : r.code,
+            isDay: i === 0 && fc.current ? fc.current.isDay : r.isDay,
+            now: i === 0
+          }));
+        }
+      }
+      if (!items.length){
+        items = [8, 10, 12, 14, 16, 18, 20]
+          .map(h => fc.rows.find(r => r.date === key && r.h === h))
+          .filter(Boolean)
+          .map(r => ({ label: hourLabel(r.h), temp: r.temp, code: r.code, isDay: r.isDay, now: false }));
+      }
+      if (!items.length){ box.innerHTML = '<div class="loading" style="width:100%;padding:18px 0">No temperature data for this day.</div>'; }
+      else box.innerHTML = items.map(it => `
+        <div class="tcol${it.now ? ' now' : ''}">
+          <div class="tl">${it.label}</div>
+          ${wxIcon(it.code, it.isDay)}
+          <div class="tv">${it.temp == null ? '—' : Math.round(it.temp) + '°'}</div>
+        </div>`).join('');
+      const d = fc.daily[key];
+      $('temp-hl').textContent = d ? `H: ${Math.round(d.hi)}°  L: ${Math.round(d.lo)}°` : '';
     } catch (err){
-      setOnlineBanner();
-      wrap.innerHTML = `<div class="error-msg">Couldn't load tide data${navigator.onLine ? '' : ' (offline, and no cached copy for this day)'}.<br>${err.message}</div>`;
+      if (loc().id !== p.id) return;
+      box.innerHTML = `<div class="error-msg" style="width:100%;padding:18px 0">Couldn't load temperatures${navigator.onLine ? '' : ' (offline)'}.</div>`;
+      $('temp-hl').textContent = '';
     }
   }
 
-  function nowMinutesEastern(){
-    const p = easternParts(new Date());
+  // =====================================================================
+  //  Rendering: Tides
+  // =====================================================================
+  function nowMinutes(){
+    const p = tzParts(new Date());
     return p.hh * 60 + p.mm;
   }
-
   function interpolateAt(curve, minutes){
     if (!curve.length) return null;
     for (let i = 0; i < curve.length - 1; i++){
@@ -694,19 +1177,17 @@
     }
     return minutes < curve[0].minutes ? curve[0].v : curve[curve.length-1].v;
   }
-
-  function renderNowReadout(curve, hilo){
-    const nowMin = nowMinutesEastern();
+  function renderNowReadout(curve){
+    const nowMin = nowMinutes();
     const val = interpolateAt(curve, nowMin);
     const valBefore = interpolateAt(curve, Math.max(0, nowMin - 6));
     const rising = val !== null && valBefore !== null ? val > valBefore : true;
-    const el = document.getElementById('now-readout');
+    const el = $('now-readout');
     if (val === null){ el.textContent = ''; return; }
     el.innerHTML = `<span class="${rising ? 'trend-up' : 'trend-down'}">Now: <b>${val.toFixed(1)} ft</b> · ${rising ? 'rising' : 'falling'}</span>`;
   }
-
   function renderHiloList(hilo){
-    const list = document.getElementById('hilo-list');
+    const list = $('hilo-list');
     list.innerHTML = '';
     hilo.forEach(pt => {
       const isHigh = pt.type === 'H';
@@ -723,7 +1204,6 @@
       list.appendChild(row);
     });
   }
-
   function renderChart(wrap, curve, hilo, isToday){
     if (!curve.length){
       wrap.innerHTML = '<div class="loading">No data for this day.</div>';
@@ -742,7 +1222,6 @@
     const xForMin = m => marginLeft + (m / 1440) * plotW;
     const yForVal = v => marginTop + plotH - ((v - minV) / (maxV - minV)) * plotH;
 
-    // smooth-ish path (dense 6-min points already look smooth as straight segments)
     let d = '';
     curve.forEach((p, i) => {
       const x = xForMin(p.minutes), y = yForVal(p.v);
@@ -750,16 +1229,12 @@
     });
     const areaD = d + `L${xForMin(curve[curve.length-1].minutes).toFixed(1)},${(marginTop+plotH).toFixed(1)} L${xForMin(curve[0].minutes).toFixed(1)},${(marginTop+plotH).toFixed(1)} Z`;
 
-    // gridlines: horizontal at nice foot steps
     const range = maxV - minV;
     const step = range > 8 ? 2 : (range > 4 ? 1 : 0.5);
     const gridLines = [];
     let gv = Math.ceil(minV / step) * step;
-    for (; gv <= maxV; gv += step){
-      gridLines.push(gv);
-    }
+    for (; gv <= maxV; gv += step){ gridLines.push(gv); }
 
-    // vertical gridlines every 4 hours
     const hourMarks = [0, 240, 480, 720, 960, 1200, 1440];
     const hourLabels = ['12a','4a','8a','12p','4p','8p','12a'];
 
@@ -769,26 +1244,21 @@
       <stop offset="100%" stop-color="rgba(79,168,201,0.02)"/>
     </linearGradient></defs>`;
 
-    // horizontal grid + labels
     gridLines.forEach(v => {
       const y = yForVal(v);
       svg += `<line class="grid-line" x1="${marginLeft}" y1="${y.toFixed(1)}" x2="${W-marginRight}" y2="${y.toFixed(1)}"/>`;
       svg += `<text class="axis-label" x="${marginLeft-6}" y="${(y+3).toFixed(1)}" text-anchor="end">${v.toFixed(1)}</text>`;
     });
-
-    // vertical hour labels
     hourMarks.forEach((m, i) => {
       const x = xForMin(m);
       svg += `<text class="axis-label" x="${x.toFixed(1)}" y="${H-8}" text-anchor="${i===0?'start':(i===hourMarks.length-1?'end':'middle')}">${hourLabels[i]}</text>`;
     });
 
-    // water fill + line
     svg += `<path d="${areaD}" fill="url(#waterFill)" stroke="none"/>`;
     svg += `<path d="${d}" fill="none" stroke="#C8A84A" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
 
-    // now line + dot
     if (isToday){
-      const nowMin = nowMinutesEastern();
+      const nowMin = nowMinutes();
       const nx = xForMin(nowMin);
       const nv = interpolateAt(curve, nowMin);
       svg += `<line class="now-line" x1="${nx.toFixed(1)}" y1="${marginTop}" x2="${nx.toFixed(1)}" y2="${marginTop+plotH}"/>`;
@@ -798,7 +1268,6 @@
       }
     }
 
-    // hi/lo markers
     hilo.forEach(pt => {
       const x = xForMin(pt.minutes), y = yForVal(pt.v);
       const isHigh = pt.type === 'H';
@@ -812,78 +1281,80 @@
     wrap.innerHTML = svg;
   }
 
-  // ---------- wind ----------
-  // Open-Meteo is free, needs no API key, and allows direct browser requests.
-  // Location is a single constant now; a future location picker can swap it.
-  const WIND_LOC = { lat: 32.608, lon: -80.085, name: 'Kiawah Island' };
-  // Rough bearing of Kiawah's beach, running toward the NE end of the island.
-  const COAST_BEARING = 60;
-  const WIND_WINDOWS = {
-    am:  { start: 7,  end: 11 },
-    mid: { start: 11, end: 15 },
-    pm:  { start: 15, end: 19 }
-  };
-  const STRIP_FIRST_HOUR = 5, STRIP_LAST_HOUR = 21;
-  const CARDINALS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  function updateTideFooter(src){
+    const el = $('foot-tide');
+    const sub = src && SUBORDINATE[src.id];
+    if (sub){
+      el.innerHTML = `Predictions from NOAA CO-OPS (tidesandcurrents.noaa.gov). ${esc(src.name)} (${esc(src.id)}) is a subordinate
+        station, so times/heights are computed from the ${esc(sub.refName)} (${esc(sub.ref)}) reference curve using NOAA's
+        published offset (+${sub.offset.H.minutes} min / ×${sub.offset.H.ratio} at high tide, +${sub.offset.L.minutes} min / ×${sub.offset.L.ratio} at low tide).`;
+    } else if (src){
+      el.textContent = `Tide predictions from NOAA CO-OPS (tidesandcurrents.noaa.gov), station ${src.id}${src.distMi >= 3 ? ` — about ${src.distMi} mi from this location, so local times and heights can differ` : ''}.`;
+    } else {
+      el.textContent = 'Tide predictions come from NOAA CO-OPS, which covers US waters only.';
+    }
+  }
 
-  state.wind = null;       // { 'YYYY-MM-DD': [{h, speed, gust, dir}, ...] }
-  state.windAt = 0;
-  state.windSel = null;    // 'am' | 'mid' | 'pm' once chosen / auto-picked
-  state.windShownKey = null;
+  async function renderTides(p, dp, isToday){
+    const wrap = $('chart-wrap');
+    const key = p.id + '|' + isoDay(dp);
+    const stillHere = () => loc().id === p.id && isoDay(selectedDay()) === isoDay(dp);
 
+    if (state.tideShownKey !== key){
+      wrap.innerHTML = '<div class="loading" id="chart-status">Loading tide predictions…</div>';
+      $('hilo-list').innerHTML = '';
+      $('now-readout').textContent = '';
+    }
+    let src;
+    try {
+      src = await resolveTide(p);
+    } catch (err){
+      if (!stillHere()) return;
+      setStationLine('');
+      wrap.innerHTML = `<div class="error-msg">Couldn't look up a tide station${navigator.onLine ? '' : ' (offline)'}.<br>${esc(err.message)}<br><button class="retry-btn" type="button" id="tide-retry">Try again</button></div>`;
+      const b = $('tide-retry'); if (b) b.addEventListener('click', () => renderTides(p, dp, isToday));
+      state.tideShownKey = null;
+      return;
+    }
+    if (!stillHere()) return;
+    setStationLine(stationText(p, src));
+    updateTideFooter(src);
+
+    if (!src){
+      wrap.innerHTML = `<div class="loading">No NOAA tide station within ${MAX_STATION_MI} mi of ${esc(p.name)}.<br>NOAA tide predictions cover US waters only.</div>`;
+      $('hilo-list').innerHTML = '';
+      $('now-readout').textContent = '';
+      state.tideShownKey = key;
+      return;
+    }
+    try {
+      const { hilo, curve } = await getDayData(src, dp);
+      if (!stillHere()) return;
+      setOnlineBanner();
+      renderChart(wrap, curve, hilo, isToday);
+      renderHiloList(hilo);
+      if (isToday) renderNowReadout(curve); else $('now-readout').textContent = '';
+      state.tideShownKey = key;
+    } catch (err){
+      if (!stillHere()) return;
+      setOnlineBanner();
+      wrap.innerHTML = `<div class="error-msg">Couldn't load tide data${navigator.onLine ? '' : ' (offline, and no cached copy for this day)'}.<br>${esc(err.message)}</div>`;
+      state.tideShownKey = null;
+    }
+  }
+
+  // =====================================================================
+  //  Rendering: Wind
+  // =====================================================================
   function cardinal(deg){
     return CARDINALS[Math.round((((deg % 360) + 360) % 360) / 22.5) % 16];
   }
-
-  function windUrl(){
-    const params = new URLSearchParams({
-      latitude: WIND_LOC.lat,
-      longitude: WIND_LOC.lon,
-      hourly: 'wind_speed_10m,wind_direction_10m,wind_gusts_10m',
-      wind_speed_unit: 'mph',
-      timezone: TZ,
-      past_days: 1,
-      forecast_days: 8
-    });
-    return 'https://api.open-meteo.com/v1/forecast?' + params.toString();
-  }
-
-  async function getWind(){
-    if (state.wind && Date.now() - state.windAt < 30 * 60000) return state.wind;
-    const res = await fetch(windUrl());
-    if (!res.ok) throw new Error('Wind service error ' + res.status);
-    const json = await res.json();
-    if (json.error || !json.hourly) throw new Error(json.reason || 'Wind service error');
-    const t = json.hourly.time;
-    const spd = json.hourly.wind_speed_10m;
-    const gst = json.hourly.wind_gusts_10m;
-    const dir = json.hourly.wind_direction_10m;
-    const byDate = {};
-    for (let i = 0; i < t.length; i++){
-      if (spd[i] == null || dir[i] == null) continue;
-      const [dayStr, timeStr] = t[i].split('T');
-      (byDate[dayStr] = byDate[dayStr] || []).push({
-        h: +timeStr.slice(0, 2),
-        speed: spd[i],
-        gust: gst[i] == null ? spd[i] : gst[i],
-        dir: dir[i]
-      });
-    }
-    state.wind = byDate;
-    state.windAt = Date.now();
-    return byDate;
-  }
-
-  function windDayKey(dp){ return `${dp.y}-${pad2(dp.m)}-${pad2(dp.d)}`; }
-
   function speedClass(mph){
     return mph < 10 ? 'w-calm' : (mph < 17 ? 'w-mod' : 'w-strong');
   }
-
   function arrowSvg(towardDeg){
     return `<svg viewBox="-11 -11 22 22" aria-hidden="true"><g transform="rotate(${towardDeg.toFixed(0)})"><path d="M0,8 L0,-8 M-5,-3 L0,-8 L5,-3"/></g></svg>`;
   }
-
   // Speed-weighted vector average of the wind over a set of hours.
   // Returns where the wind is blowing TOWARD (compass bearing), plus stats.
   function summarizeWind(hours){
@@ -897,12 +1368,11 @@
     });
     const n = hours.length;
     const avg = sumSpeed / n;
-    const mag = Math.sqrt(ux * ux + uy * uy) / n;   // mph of steady wind
+    const mag = Math.sqrt(ux * ux + uy * uy) / n;
     const toward = ((Math.atan2(ux, uy) * 180 / Math.PI) + 360) % 360;
-    const steadiness = avg > 0 ? mag / avg : 0;      // 1 = one direction all window
+    const steadiness = avg > 0 ? mag / avg : 0;
     return { avg, maxGust, toward, from: (toward + 180) % 360, steadiness };
   }
-
   function compassSvg(towardDeg){
     let ticks = '';
     [0, 90, 180, 270].forEach(a => {
@@ -918,15 +1388,14 @@
       <g transform="rotate(${towardDeg.toFixed(0)})"><path class="arrow" d="M0,28 L0,-30 M-11,-17 L0,-30 L11,-17"/></g>
     </svg>`;
   }
-
   function pickDefaultWindow(isToday){
     if (!isToday) return 'am';
-    const h = easternParts(new Date()).hh;
+    const h = tzParts(new Date()).hh;
     return h < 11 ? 'am' : (h < 15 ? 'mid' : 'pm');
   }
 
-  function renderWindSummary(rows, isToday){
-    const box = document.getElementById('wind-summary');
+  function renderWindSummary(p, rows){
+    const box = $('wind-summary');
     const win = WIND_WINDOWS[state.windSel];
     const hours = rows.filter(r => r.h >= win.start && r.h < win.end);
     if (!hours.length){
@@ -934,12 +1403,6 @@
       return;
     }
     const s = summarizeWind(hours);
-    // Component of the wind along the beach axis (+ = toward the NE end).
-    const diff = (s.toward - COAST_BEARING) * Math.PI / 180;
-    const alongNE = s.avg * s.steadiness * Math.cos(diff);
-    const tailEnd = alongNE >= 0 ? 'NE' : 'SW';
-    const backEnd = alongNE >= 0 ? 'SW' : 'NE';
-    const alongMph = Math.abs(alongNE);
 
     let note = '';
     if (s.steadiness < 0.5){
@@ -950,9 +1413,22 @@
       note = 'Strong wind — the inland return will feel much better.';
     }
 
-    const beachLine = alongMph < 3
-      ? 'Wind is mostly <b>across</b> the beach, so neither direction gets a big push.'
-      : `Along the beach: tailwind heading <b>${tailEnd}</b> (about ${alongMph.toFixed(0)} mph push). Heading ${backEnd} is into it — go inland for that leg.`;
+    let routeLine;
+    if (typeof p.coast === 'number'){
+      // Component of the wind along the beach axis (+ = toward the NE end).
+      const diff = (s.toward - p.coast) * Math.PI / 180;
+      const along = s.avg * s.steadiness * Math.cos(diff);
+      const tailEnd = along >= 0 ? 'NE' : 'SW';
+      const backEnd = along >= 0 ? 'SW' : 'NE';
+      routeLine = Math.abs(along) < 3
+        ? 'Wind is mostly <b>across</b> the beach, so neither direction gets a big push.'
+        : `Along the beach: tailwind heading <b>${tailEnd}</b> (about ${Math.abs(along).toFixed(0)} mph push). Heading ${backEnd} is into it — go inland for that leg.`;
+    } else {
+      const back = cardinal((s.toward + 180) % 360);
+      routeLine = s.avg < 4
+        ? 'Light wind — no strong push either way.'
+        : `Heading <b>${cardinal(s.toward)}</b> gets the push. Heading ${back} is into it — loop inland or find shelter for that leg.`;
+    }
 
     box.innerHTML = `
       <div class="wind-summary">
@@ -961,16 +1437,16 @@
           <div class="big">From <span>${cardinal(s.from)}</span> · ${s.avg.toFixed(0)} mph</div>
           Gusts to <b>${s.maxGust.toFixed(0)} mph</b> · blowing toward ${cardinal(s.toward)}<br>
           Tailwind compass heading: <b>${cardinal(s.toward)}</b> (${s.toward.toFixed(0)}°)<br>
-          ${beachLine}
+          ${routeLine}
           ${note ? `<div class="note">${note}</div>` : ''}
         </div>
       </div>`;
   }
 
   function renderWindStrip(rows, isToday, recenter){
-    const strip = document.getElementById('wind-strip');
+    const strip = $('wind-strip');
     const win = WIND_WINDOWS[state.windSel];
-    const nowH = isToday ? easternParts(new Date()).hh : -1;
+    const nowH = isToday ? tzParts(new Date()).hh : -1;
     strip.innerHTML = '';
     rows.filter(r => r.h >= STRIP_FIRST_HOUR && r.h <= STRIP_LAST_HOUR).forEach(r => {
       const toward = (r.dir + 180) % 360;
@@ -990,8 +1466,6 @@
     // Only re-center when the day or window changed, so the once-a-minute
     // refresh doesn't fight with the person scrolling the strip.
     if (recenter){
-      // Wait a frame so layout (and fonts) have settled, then center using
-      // real on-screen positions (offsetLeft is measured from the page, not the strip).
       requestAnimationFrame(() => {
         const target = strip.querySelector('.now') || strip.querySelector('.in-window');
         const scroller = strip.parentElement;
@@ -1002,68 +1476,387 @@
       });
     }
   }
-
   function updateSegButtons(){
     document.querySelectorAll('#wind-seg button').forEach(b => {
       b.classList.toggle('active', b.dataset.win === state.windSel);
     });
   }
 
-  async function renderWind(dp, isToday){
-    const key = windDayKey(dp);
-    const summary = document.getElementById('wind-summary');
+  async function renderWind(p, dp, isToday){
+    const key = p.id + '|' + isoDay(dp);
+    const summary = $('wind-summary');
+    const stillHere = () => loc().id === p.id && isoDay(selectedDay()) === isoDay(dp);
     if (state.windShownKey !== key){
       summary.innerHTML = '<div class="loading">Loading wind forecast…</div>';
-      document.getElementById('wind-strip').innerHTML = '';
+      $('wind-strip').innerHTML = '';
     }
     try {
-      const byDate = await getWind();
-      // ignore if the user already moved to another day while we waited
-      if (windDayKey(addDaysToAnchor(todayAnchor(), state.offset)) !== key) return;
-      const rows = (byDate[key] || []).slice().sort((a, b) => a.h - b.h);
+      const fc = await getForecast(p);
+      if (!stillHere()) return;
+      const rows = (fc.windByDate[isoDay(dp)] || []).slice().sort((a, b) => a.h - b.h);
       if (!rows.length){
         summary.innerHTML = '<div class="loading">No wind data for this day.</div>';
-        document.getElementById('wind-strip').innerHTML = '';
+        $('wind-strip').innerHTML = '';
         return;
       }
       if (!state.windSel) state.windSel = pickDefaultWindow(isToday);
       updateSegButtons();
       const recenter = state.windShownKey !== key;
-      renderWindSummary(rows, isToday);
+      renderWindSummary(p, rows);
       renderWindStrip(rows, isToday, recenter);
       state.windShownKey = key;
     } catch (err){
-      summary.innerHTML = `<div class="error-msg">Couldn't load wind${navigator.onLine ? '' : ' (offline, and no cached copy)'}.<br>${err.message}</div>`;
-      document.getElementById('wind-strip').innerHTML = '';
+      if (!stillHere()) return;
+      summary.innerHTML = `<div class="error-msg">Couldn't load wind${navigator.onLine ? '' : ' (offline, and no cached copy)'}.<br>${esc(err.message)}</div>`;
+      $('wind-strip').innerHTML = '';
     }
   }
 
-  document.getElementById('wind-seg').addEventListener('click', (e) => {
+  // Animated wind map: Windy's free embeddable map (streamlines + time slider).
+  // Loaded only when tapped, so it costs no data until you want it.
+  function windyUrl(p){
+    const q = new URLSearchParams({
+      lat: p.lat, lon: p.lon, zoom: 8,
+      level: 'surface', overlay: 'wind', product: 'ecmwf',
+      menu: '', message: 'true', marker: 'true', calendar: 'now', pressure: '', type: 'map',
+      location: 'coordinates', detail: '',
+      detailLat: p.lat, detailLon: p.lon,
+      metricWind: 'mph', metricTemp: 'default'
+    });
+    return 'https://embed.windy.com/embed2.html?' + q.toString();
+  }
+  function resetWindMap(){
+    $('wind-map-box').innerHTML = '';
+    $('wind-map-box').classList.remove('show');
+    $('wind-map-btn').textContent = '🌬️ Show animated wind map';
+  }
+
+  // =====================================================================
+  //  Main view: load everything for the selected place + day
+  // =====================================================================
+  function loadAndRender(){
+    const p = loc();
+    const anchor = todayAnchor();
+    const dp = addDaysToAnchor(anchor, state.offset);
+    const isToday = sameDate(dp, anchor);
+
+    $('date-heading-text').textContent = `${weekdayShort(dp)}, ${monthShort(dp)} ${dp.d}`;
+    $('today-pill').style.display = isToday ? 'inline-block' : 'none';
+
+    // each section loads independently, so one failing never hides the others
+    renderTemp(p, dp, isToday);
+    renderTides(p, dp, isToday);
+    renderWind(p, dp, isToday);
+  }
+
+  // =====================================================================
+  //  Views + choosing a location
+  // =====================================================================
+  function showView(v){
+    state.view = v;
+    $('view-main').hidden = v !== 'main';
+    $('view-loc').hidden = v !== 'loc';
+    renderHeader();
+    window.scrollTo(0, 0);
+    if (v === 'loc'){
+      renderLocList();
+      refreshLocForecasts();
+    } else {
+      renderChipRow();
+      scrollActiveChipIntoView();
+      loadAndRender();
+    }
+  }
+
+  function selectLocation(id){
+    if (id !== selId){
+      selId = id;
+      store.set('kt.sel.v1', selId);
+      state.offset = 0;
+      state.windShownKey = null;
+      state.tideShownKey = null;
+      resetWindMap();
+      // clear the previous place's content right away
+      $('temp-row').innerHTML = '<div class="loading" style="width:100%;padding:18px 0">Loading…</div>';
+      $('temp-hl').textContent = '';
+      setStationLine('');
+    }
+    showView('main');
+  }
+
+  // ---------- Choose Location: list ----------
+  function cardHtml(p){
+    const fc = state.fc[p.id];
+    const cur = fc && fc.current;
+    const info = cur ? wxInfo(cur.code, cur.isDay) : null;
+    const today = fc ? fc.daily[isoDay(todayAnchor(p.tz))] : null;
+    return `
+      <div class="loc-left">
+        <div class="loc-name">${esc(p.name)}</div>
+        <div class="loc-sub">
+          ${cur ? wxIcon(cur.code, cur.isDay) : ''}
+          <span>${info ? esc(info.label) : (fc === undefined ? 'Loading…' : '—')}</span>
+          <span class="bar"></span>
+          <span>${esc(localClock(p.tz || DEVICE_TZ))}</span>
+        </div>
+      </div>
+      <div class="loc-right">
+        <div class="loc-temp">${cur && cur.temp != null ? Math.round(cur.temp) + '°' : '—'}</div>
+        <div class="loc-hl">${today ? `<span>H: ${Math.round(today.hi)}°</span><span>L: ${Math.round(today.lo)}°</span>` : ''}</div>
+      </div>`;
+  }
+  function renderLocList(flashId){
+    const list = $('loc-list');
+    list.innerHTML = '';
+    presets.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'loc-row';
+      row.dataset.id = p.id;
+      row.innerHTML = `
+        <button class="loc-del" type="button" aria-label="Remove ${esc(p.name)}">Remove</button>
+        <div class="loc-card${p.id === selId ? ' sel' : ''}${p.id === flashId ? ' flash' : ''}" role="button" tabindex="0" aria-label="${esc(p.name)}">${cardHtml(p)}</div>`;
+      list.appendChild(row);
+    });
+    if (flashId){
+      const r = list.querySelector(`.loc-row[data-id="${CSS.escape(flashId)}"]`);
+      if (r) r.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      setTimeout(() => { const c = r && r.querySelector('.loc-card'); if (c) c.classList.remove('flash'); }, 1600);
+    }
+  }
+  // refresh the text inside the cards without disturbing swipe state
+  function patchLocCards(){
+    presets.forEach(p => {
+      const row = $('loc-list').querySelector(`.loc-row[data-id="${CSS.escape(p.id)}"]`);
+      const card = row && row.querySelector('.loc-card');
+      if (card) card.innerHTML = cardHtml(p);
+    });
+  }
+  function refreshLocForecasts(){
+    presets.forEach(p => {
+      getForecast(p).then(() => { if (state.view === 'loc') patchLocCards(); }).catch(() => {
+        if (state.view === 'loc'){
+          const row = $('loc-list').querySelector(`.loc-row[data-id="${CSS.escape(p.id)}"] .loc-sub span`);
+          if (row && row.textContent === 'Loading…') row.textContent = navigator.onLine ? 'Unavailable' : 'Offline';
+        }
+      });
+    });
+  }
+
+  // ---------- swipe to remove ----------
+  let drag = null, suppressClickUntil = 0;
+  function closeRow(row){ row.classList.remove('open'); const c = row.querySelector('.loc-card'); if (c) c.style.transform = ''; }
+  function openRow(row){ row.classList.add('open'); }
+  function closeAllRows(except){
+    $('loc-list').querySelectorAll('.loc-row.open').forEach(r => { if (r !== except) closeRow(r); });
+  }
+
+  const listEl = $('loc-list');
+  listEl.addEventListener('pointerdown', e => {
+    const card = e.target.closest('.loc-card');
+    if (!card) return;
+    const row = card.parentElement;
+    closeAllRows(row);
+    drag = { card, row, id: e.pointerId, startX: e.clientX, startY: e.clientY,
+             base: row.classList.contains('open') ? -REVEAL : 0, moved: false, x: 0 };
+  });
+  listEl.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.startX, dy = e.clientY - drag.startY;
+    if (!drag.moved){
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (Math.abs(dy) > Math.abs(dx)){ drag = null; return; }   // it's a scroll, not a swipe
+      drag.moved = true;
+      try { drag.card.setPointerCapture(e.pointerId); } catch(_){}
+      drag.row.classList.add('dragging');
+      drag.card.style.transition = 'none';
+    }
+    drag.x = Math.min(0, Math.max(-REVEAL - 36, drag.base + dx));
+    drag.card.style.transform = `translateX(${drag.x}px)`;
+  });
+  function endDrag(e){
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null;
+    if (!d.moved) return;
+    d.card.style.transition = '';
+    d.card.style.transform = '';
+    d.row.classList.remove('dragging');
+    if (d.x < -REVEAL / 2) openRow(d.row); else closeRow(d.row);
+    suppressClickUntil = Date.now() + 350;
+  }
+  listEl.addEventListener('pointerup', endDrag);
+  listEl.addEventListener('pointercancel', endDrag);
+
+  listEl.addEventListener('click', e => {
+    if (Date.now() < suppressClickUntil) return;
+    const del = e.target.closest('.loc-del');
+    const row = e.target.closest('.loc-row');
+    if (!row) return;
+    if (del){ removePreset(row.dataset.id); return; }
+    if (row.classList.contains('open')){ closeRow(row); return; }
+    selectLocation(row.dataset.id);
+  });
+  listEl.addEventListener('keydown', e => {
+    const card = e.target.closest('.loc-card');
+    if (!card) return;
+    const row = card.parentElement;
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); selectLocation(row.dataset.id); }
+    else if (e.key === 'Delete' || e.key === 'Backspace'){ e.preventDefault(); removePreset(row.dataset.id); }
+  });
+
+  function removePreset(id){
+    const row = $('loc-list').querySelector(`.loc-row[data-id="${CSS.escape(id)}"]`);
+    if (presets.length <= 1){
+      toast('Keep at least one location.');
+      if (row) closeRow(row);
+      return;
+    }
+    presets = presets.filter(p => p.id !== id);
+    delete state.fc[id];
+    savePresets();
+    if (selId === id){
+      selId = presets[0].id;
+      store.set('kt.sel.v1', selId);
+      state.windShownKey = null; state.tideShownKey = null; state.offset = 0;
+      resetWindMap();
+    }
+    if (row){
+      row.classList.remove('open');
+      row.classList.add('removing');
+      setTimeout(() => { if (state.view === 'loc') renderLocList(); }, 240);
+    }
+  }
+
+  // ---------- search to add ----------
+  function placeLabel(r){
+    let region = '';
+    if (r.country_code === 'US') region = US_ST[r.admin1] || r.admin1 || '';
+    else if (r.country_code === 'CA') region = CA_PR[r.admin1] || r.admin1 || '';
+    else region = r.country || r.admin1 || '';
+    return region ? `${r.name}, ${region}` : r.name;
+  }
+  const qEl = $('loc-q');
+  let searchTimer = null, searchSeq = 0;
+
+  function showResults(html){
+    const box = $('loc-results');
+    if (html == null){
+      box.hidden = true; box.innerHTML = '';
+      $('loc-list').hidden = false;
+      return;
+    }
+    box.hidden = false; box.innerHTML = html;
+    $('loc-list').hidden = true;
+  }
+  async function doSearch(q){
+    const my = ++searchSeq;
+    showResults('<div class="loc-empty">Searching…</div>');
+    try {
+      const url = GEO_API + '?' + new URLSearchParams({ name: q, count: 8, language: 'en', format: 'json' });
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Search error ' + res.status);
+      const j = await res.json();
+      if (my !== searchSeq) return;
+      const results = j.results || [];
+      if (!results.length){
+        showResults(`<div class="loc-empty">No places found for “${esc(q)}”.<br>Try a city name, or a nearby town.</div>`);
+        return;
+      }
+      showResults(results.map((r, i) => `
+        <button class="loc-result" type="button" data-i="${i}">
+          <div>
+            <div class="r-name">${esc(placeLabel(r))}</div>
+            <div class="r-sub">${esc([r.admin2, r.country].filter(Boolean).join(' · '))}</div>
+          </div>
+          <span class="r-add" aria-hidden="true">+</span>
+        </button>`).join(''));
+      $('loc-results')._results = results;
+    } catch (err){
+      if (my !== searchSeq) return;
+      showResults(`<div class="loc-empty">${navigator.onLine ? 'Search is unavailable right now.' : 'You are offline — searching needs a connection.'}</div>`);
+    }
+  }
+  qEl.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = qEl.value.trim();
+    $('loc-clear').hidden = !q;
+    if (q.length < 2){ searchSeq++; showResults(null); return; }
+    searchTimer = setTimeout(() => doSearch(q), 300);
+  });
+  function clearSearch(){
+    qEl.value = ''; $('loc-clear').hidden = true; searchSeq++; showResults(null);
+  }
+  $('loc-clear').addEventListener('click', () => { clearSearch(); qEl.focus(); });
+
+  function nearExisting(lat, lon){
+    return presets.find(p => Math.abs(p.lat - lat) < 0.03 && Math.abs(p.lon - lon) < 0.03);
+  }
+  function addPreset(p){
+    const dup = nearExisting(p.lat, p.lon);
+    if (dup){
+      toast(`${dup.name} is already saved.`);
+      clearSearch();
+      renderLocList(dup.id);
+      return;
+    }
+    presets.push(p);
+    savePresets();
+    clearSearch();
+    qEl.blur();
+    renderLocList(p.id);
+    refreshLocForecasts();
+    toast(`Added ${p.name}. Tap it to see conditions.`);
+  }
+  $('loc-results').addEventListener('click', e => {
+    const btn = e.target.closest('.loc-result');
+    if (!btn) return;
+    const r = ($('loc-results')._results || [])[+btn.dataset.i];
+    if (!r) return;
+    addPreset({
+      id: 'g' + (r.id || Date.now()),
+      name: placeLabel(r),
+      lat: +(+r.latitude).toFixed(3),
+      lon: +(+r.longitude).toFixed(3),
+      tz: r.timezone || DEVICE_TZ
+    });
+  });
+
+  // ---------- current location ----------
+  $('loc-here').addEventListener('click', () => {
+    if (!navigator.geolocation){ toast("Location isn't available on this device."); return; }
+    toast('Finding you…');
+    navigator.geolocation.getCurrentPosition(pos => {
+      const lat = +pos.coords.latitude.toFixed(3), lon = +pos.coords.longitude.toFixed(3);
+      let p = presets.find(x => x.id === 'here');
+      if (p){
+        p.lat = lat; p.lon = lon; delete p.tide; delete p.tz; delete state.fc[p.id];
+      } else {
+        p = { id: 'here', name: 'My Location', lat, lon };
+        presets.unshift(p);
+      }
+      savePresets();
+      clearSearch();
+      renderLocList(p.id);
+      refreshLocForecasts();
+    }, () => {
+      toast("Couldn't get your location. Check Location access for this site in Settings.");
+    }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
+  });
+
+  // =====================================================================
+  //  Wind controls + map button
+  // =====================================================================
+  $('wind-seg').addEventListener('click', e => {
     const btn = e.target.closest('button');
     if (!btn) return;
     state.windSel = btn.dataset.win;
     state.windShownKey = null;
     const anchor = todayAnchor();
-    const dp = addDaysToAnchor(anchor, state.offset);
-    renderWind(dp, sameDate(dp, anchor));
+    const dp = selectedDay();
+    renderWind(loc(), dp, sameDate(dp, anchor));
   });
-
-  // Animated wind map: Windy's free embeddable map (streamlines + time slider).
-  // Loaded only when tapped, so it costs no data until you want it.
-  function windyUrl(){
-    const q = new URLSearchParams({
-      lat: WIND_LOC.lat, lon: WIND_LOC.lon, zoom: 8,
-      level: 'surface', overlay: 'wind', product: 'ecmwf',
-      menu: '', message: 'true', marker: 'true', calendar: 'now', pressure: '', type: 'map',
-      location: 'coordinates', detail: '',
-      detailLat: WIND_LOC.lat, detailLon: WIND_LOC.lon,
-      metricWind: 'mph', metricTemp: 'default'
-    });
-    return 'https://embed.windy.com/embed2.html?' + q.toString();
-  }
-  document.getElementById('wind-map-btn').addEventListener('click', () => {
-    const box = document.getElementById('wind-map-box');
-    const btn = document.getElementById('wind-map-btn');
+  $('wind-map-btn').addEventListener('click', () => {
+    const box = $('wind-map-box');
+    const btn = $('wind-map-btn');
     const open = box.classList.toggle('show');
     btn.textContent = open ? 'Hide wind map' : '🌬️ Show animated wind map';
     if (open && !box.firstChild){
@@ -1071,28 +1864,31 @@
         box.innerHTML = '<div class="error-msg">The wind map needs an internet connection.</div>';
         return;
       }
-      box.innerHTML = `<iframe title="Wind map" src="${windyUrl()}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      box.innerHTML = `<iframe title="Wind map" src="${windyUrl(loc())}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         <div class="map-note">Map by <a href="https://www.windy.com/" target="_blank" rel="noopener">Windy.com</a> (ECMWF model). Drag the time bar at the bottom to see later hours.</div>`;
     }
   });
 
-  // ---------- init ----------
-  document.getElementById('prev-btn').addEventListener('click', () => selectOffset(state.offset - 1));
-  document.getElementById('next-btn').addEventListener('click', () => selectOffset(state.offset + 1));
-  window.addEventListener('online', setOnlineBanner);
+  // =====================================================================
+  //  Init
+  // =====================================================================
+  $('loc-btn').addEventListener('click', () => showView(state.view === 'loc' ? 'main' : 'loc'));
+  $('prev-btn').addEventListener('click', () => selectOffset(state.offset - 1));
+  $('next-btn').addEventListener('click', () => selectOffset(state.offset + 1));
+  window.addEventListener('online', () => { setOnlineBanner(); if (state.view === 'main') loadAndRender(); });
   window.addEventListener('offline', setOnlineBanner);
 
-  renderChipRow();
-  scrollActiveChipIntoView();
+  renderHeader();
   setOnlineBanner();
-  loadAndRender();
+  showView('main');
 
-  // refresh the "now" line every minute while the tab/app is open
+  // keep the "now" markers and local clocks fresh while the app is open
   setInterval(() => {
-    const anchor = todayAnchor();
-    const dp = addDaysToAnchor(anchor, state.offset);
-    if (sameDate(dp, anchor)){
-      loadAndRender();
+    if (state.view === 'main'){
+      const anchor = todayAnchor();
+      if (sameDate(selectedDay(), anchor)) loadAndRender();
+    } else if (!drag && !$('loc-list').querySelector('.loc-row.open')){
+      patchLocCards();
     }
   }, 60000);
 

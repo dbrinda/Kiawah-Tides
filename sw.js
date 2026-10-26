@@ -1,7 +1,7 @@
 // Kiawah Tides service worker
 // Bump this version whenever index.html/app shell changes to force a refresh.
-const SHELL_CACHE = 'kiawah-tides-shell-v2';
-const DATA_CACHE = 'kiawah-tides-data-v2';
+const SHELL_CACHE = 'kiawah-tides-shell-v3';
+const DATA_CACHE = 'kiawah-tides-data-v3';
 
 const SHELL_FILES = [
   './',
@@ -9,7 +9,8 @@ const SHELL_FILES = [
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './icons/logo.png'
 ];
 
 self.addEventListener('install', (event) => {
