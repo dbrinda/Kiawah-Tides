@@ -1,7 +1,7 @@
 {
-  "name": "Kiawah Tides",
-  "short_name": "Kiawah Tides",
-  "description": "Tides and wind for Kiawah River Bridge, SC — for planning kayak and beach bike trips.",
+  "name": "TTW – Temp, Tides & Wind",
+  "short_name": "TTW",
+  "description": "Temperature, tides and wind for your saved coastal spots — for planning kayak and bike trips.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

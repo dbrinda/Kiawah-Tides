@@ -1,7 +1,7 @@
 // Kiawah Tides service worker
 // Bump this version whenever index.html/app shell changes to force a refresh.
-const SHELL_CACHE = 'kiawah-tides-shell-v6';
-const DATA_CACHE = 'kiawah-tides-data-v6';
+const SHELL_CACHE = 'kiawah-tides-shell-v7';
+const DATA_CACHE = 'kiawah-tides-data-v7';
 
 const SHELL_FILES = [
   './',

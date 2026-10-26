@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
-<title>Kiawah Tides</title>
+<title>TTW – Temp, Tides &amp; Wind</title>
 
 <meta name="theme-color" content="#0B0D0F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Kiawah Tides">
+<meta name="apple-mobile-web-app-title" content="TTW">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="manifest" href="manifest.json">
@@ -500,7 +500,7 @@
   <header class="app-head" id="app-head">
     <img class="logo" src="icons/logo.png" alt="Joyful Echo Adventures" width="96" height="96">
     <div class="head-text">
-      <div class="eyebrow">Field Conditions • Temp, Tides &amp; Winds</div>
+      <div class="eyebrow">TTW • Temp, Tides &amp; Winds</div>
       <h1 id="title">Kiawah Island, SC</h1>
       <div class="station-line" id="station-line"></div>
     </div>
@@ -1652,7 +1652,7 @@
   }
 
   // Animated wind map: Windy's free embeddable map (streamlines + time slider).
-  // Loaded only when tapped, so it costs no data until you want it.
+  // Open by default (tap the button to hide it).
   function windyUrl(p){
     const q = new URLSearchParams({
       lat: p.lat, lon: p.lon, zoom: 8,
@@ -1664,11 +1664,23 @@
     });
     return 'https://embed.windy.com/embed2.html?' + q.toString();
   }
-  function resetWindMap(){
-    $('wind-map-box').innerHTML = '';
-    $('wind-map-box').classList.remove('show');
-    $('wind-map-label').textContent = 'Show animated wind map';
+  // Open by default; the choice to hide it is remembered on this device.
+  function mapWanted(){ try { return localStorage.getItem('kt.map.v1') !== '0'; } catch(e){ return true; } }
+  function setMapWanted(v){ try { localStorage.setItem('kt.map.v1', v ? '1' : '0'); } catch(e){} }
+  function applyWindMap(){
+    const box = $('wind-map-box');
+    const open = mapWanted();
+    box.classList.toggle('show', open);
+    $('wind-map-label').textContent = open ? 'Hide wind map' : 'Show animated wind map';
+    if (!open){ box.innerHTML = ''; return; }
+    if (!navigator.onLine){
+      box.innerHTML = '<div class="error-msg">The wind map needs an internet connection.</div>';
+      return;
+    }
+    box.innerHTML = `<iframe title="Wind map" src="${windyUrl(loc())}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <div class="map-note">Map by <a href="https://www.windy.com/" target="_blank" rel="noopener">Windy.com</a> (ECMWF model). Drag the time bar at the bottom to see later hours.</div>`;
   }
+  function resetWindMap(){ applyWindMap(); }
 
   // =====================================================================
   //  Main view: load everything for the selected place + day
@@ -1994,18 +2006,8 @@
     renderWind(loc(), dp, sameDate(dp, anchor));
   });
   $('wind-map-btn').addEventListener('click', () => {
-    const box = $('wind-map-box');
-    const btn = $('wind-map-btn');
-    const open = box.classList.toggle('show');
-    $('wind-map-label').textContent = open ? 'Hide wind map' : 'Show animated wind map';
-    if (open && !box.firstChild){
-      if (!navigator.onLine){
-        box.innerHTML = '<div class="error-msg">The wind map needs an internet connection.</div>';
-        return;
-      }
-      box.innerHTML = `<iframe title="Wind map" src="${windyUrl(loc())}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-        <div class="map-note">Map by <a href="https://www.windy.com/" target="_blank" rel="noopener">Windy.com</a> (ECMWF model). Drag the time bar at the bottom to see later hours.</div>`;
-    }
+    setMapWanted(!mapWanted());
+    applyWindMap();
   });
 
   // =====================================================================
@@ -2021,6 +2023,7 @@
 
   renderHeader();
   setOnlineBanner();
+  applyWindMap();
   showView('main');
 
   // keep the "now" markers and local clocks fresh while the app is open
