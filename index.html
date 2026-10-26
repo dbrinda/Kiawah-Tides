@@ -272,9 +272,26 @@
   .wind-strip-scroll{
     margin-top: 14px;
     overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none;
+    /* soft fade at both edges so it reads as "swipe for more hours" */
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
   }
   .wind-strip-scroll::-webkit-scrollbar{ display:none; }
-  .wind-strip{ display:flex; gap:4px; padding: 2px 0; }
+  .wind-strip{ display:flex; gap:4px; padding: 4px 22px; width:max-content; }
+  .wind-map-btn{
+    width:100%; margin-top: 14px;
+    background: var(--card-2); border:1px solid var(--line); color: var(--gold);
+    border-radius: 10px; padding: 10px;
+    font-family:'IBM Plex Mono', monospace; font-size: 12.5px; cursor:pointer;
+  }
+  .wind-map-btn:active{ background: var(--card); }
+  .wind-map-box{ display:none; margin-top: 12px; }
+  .wind-map-box.show{ display:block; }
+  .wind-map-box iframe{
+    width:100%; height: 460px; border:0; border-radius: 12px; background:#0f1a24;
+  }
+  .wind-map-box .map-note{ margin-top:6px; font-size:10.5px; color: var(--text-dim); line-height:1.5; }
+  .wind-map-box .map-note a{ color: var(--text-dim); }
   .wcell{
     flex: 0 0 46px;
     background: var(--card-2);
@@ -371,7 +388,9 @@
     </div>
     <div id="wind-summary"><div class="loading">Loading wind forecast…</div></div>
     <div class="wind-strip-scroll"><div class="wind-strip" id="wind-strip"></div></div>
-    <div class="wind-legend">Arrows point the way the wind is <b>blowing toward</b>. Gold-edged hours are in the window above. Blue ring marks the current hour.</div>
+    <div class="wind-legend">Swipe the hours sideways. Arrows point the way the wind is <b>blowing toward</b>. Gold-edged hours are in the window above. Blue ring marks the current hour.</div>
+    <button class="wind-map-btn" id="wind-map-btn" type="button">🌬️ Show animated wind map</button>
+    <div class="wind-map-box" id="wind-map-box"></div>
   </section>
 
   <div class="tips">
@@ -971,11 +990,16 @@
     // Only re-center when the day or window changed, so the once-a-minute
     // refresh doesn't fight with the person scrolling the strip.
     if (recenter){
-      const target = strip.querySelector('.now') || strip.querySelector('.in-window');
-      const scroller = strip.parentElement;
-      if (target){
-        scroller.scrollLeft = target.offsetLeft - scroller.clientWidth / 2 + target.offsetWidth / 2;
-      }
+      // Wait a frame so layout (and fonts) have settled, then center using
+      // real on-screen positions (offsetLeft is measured from the page, not the strip).
+      requestAnimationFrame(() => {
+        const target = strip.querySelector('.now') || strip.querySelector('.in-window');
+        const scroller = strip.parentElement;
+        if (!target) return;
+        const t = target.getBoundingClientRect();
+        const s = scroller.getBoundingClientRect();
+        scroller.scrollLeft += (t.left + t.width / 2) - (s.left + s.width / 2);
+      });
     }
   }
 
@@ -1022,6 +1046,34 @@
     const anchor = todayAnchor();
     const dp = addDaysToAnchor(anchor, state.offset);
     renderWind(dp, sameDate(dp, anchor));
+  });
+
+  // Animated wind map: Windy's free embeddable map (streamlines + time slider).
+  // Loaded only when tapped, so it costs no data until you want it.
+  function windyUrl(){
+    const q = new URLSearchParams({
+      lat: WIND_LOC.lat, lon: WIND_LOC.lon, zoom: 8,
+      level: 'surface', overlay: 'wind', product: 'ecmwf',
+      menu: '', message: 'true', marker: 'true', calendar: 'now', pressure: '', type: 'map',
+      location: 'coordinates', detail: '',
+      detailLat: WIND_LOC.lat, detailLon: WIND_LOC.lon,
+      metricWind: 'mph', metricTemp: 'default'
+    });
+    return 'https://embed.windy.com/embed2.html?' + q.toString();
+  }
+  document.getElementById('wind-map-btn').addEventListener('click', () => {
+    const box = document.getElementById('wind-map-box');
+    const btn = document.getElementById('wind-map-btn');
+    const open = box.classList.toggle('show');
+    btn.textContent = open ? 'Hide wind map' : '🌬️ Show animated wind map';
+    if (open && !box.firstChild){
+      if (!navigator.onLine){
+        box.innerHTML = '<div class="error-msg">The wind map needs an internet connection.</div>';
+        return;
+      }
+      box.innerHTML = `<iframe title="Wind map" src="${windyUrl()}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div class="map-note">Map by <a href="https://www.windy.com/" target="_blank" rel="noopener">Windy.com</a> (ECMWF model). Drag the time bar at the bottom to see later hours.</div>`;
+    }
   });
 
   // ---------- init ----------
