@@ -216,6 +216,88 @@
   .hilo-row .time{ font-size: 14px; color: var(--text); }
   .hilo-row .ht{ font-size: 13px; color: var(--text-dim); }
 
+  /* Wind */
+  .wind{
+    margin-top: 18px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 14px 12px 14px;
+  }
+  .wind-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom: 10px;
+  }
+  .wind-head h3{
+    font-size: 15px; text-transform:uppercase; letter-spacing:0.08em;
+    color: var(--gold); font-weight:600;
+  }
+  .wind-head .units{ font-size: 10.5px; color: var(--text-dim); }
+  .seg{
+    display:flex; gap:6px; margin-bottom: 12px;
+  }
+  .seg button{
+    flex:1;
+    background: var(--card-2);
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    border-radius: 10px;
+    padding: 7px 4px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    cursor:pointer;
+  }
+  .seg button small{ display:block; font-size: 9.5px; opacity:0.75; margin-top:1px; }
+  .seg button.active{
+    background: var(--gold); border-color: var(--gold); color:#1a1608; font-weight:600;
+  }
+  .wind-summary{
+    display:flex; gap:14px; align-items:center;
+  }
+  .compass{ width: 112px; height:112px; flex-shrink:0; }
+  .compass .ring{ fill:none; stroke: var(--line); stroke-width:1.5; }
+  .compass .tick{ stroke: var(--line); stroke-width:1.5; }
+  .compass .dir-label{
+    font-family:'IBM Plex Mono', monospace; font-size: 10px; fill: var(--text-dim);
+  }
+  .compass .arrow{ stroke: var(--gold); fill:none; stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; }
+  .wind-text{ font-size: 12.5px; line-height:1.5; color: var(--text-dim); min-width:0; }
+  .wind-text .big{
+    font-family:'Oswald', sans-serif; font-size: 20px; color: var(--text);
+    letter-spacing:0.02em; line-height:1.2; margin-bottom:4px;
+  }
+  .wind-text .big span{ color: var(--gold); }
+  .wind-text b{ color: var(--text); font-weight:600; }
+  .wind-text .note{ margin-top:6px; color: var(--danger); }
+  .wind-strip-scroll{
+    margin-top: 14px;
+    overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none;
+  }
+  .wind-strip-scroll::-webkit-scrollbar{ display:none; }
+  .wind-strip{ display:flex; gap:4px; padding: 2px 0; }
+  .wcell{
+    flex: 0 0 46px;
+    background: var(--card-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 6px 0 6px 0;
+    text-align:center;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+  }
+  .wcell.in-window{ border-color: var(--gold-dim); background:#1d1b14; }
+  .wcell.now{ outline: 1.5px solid var(--water); outline-offset: 1px; }
+  .wcell .wt{ font-size: 10px; color: var(--text-dim); }
+  .wcell .ws{ font-family:'Oswald', sans-serif; font-size: 16px; line-height:1.1; }
+  .wcell .wg{ font-size: 9.5px; color: var(--text-dim); }
+  .wcell svg{ width:22px; height:22px; }
+  .wcell svg path{ fill:none; stroke: currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .w-calm{ color: var(--water); }
+  .w-mod{ color: var(--gold); }
+  .w-strong{ color: var(--danger); }
+  .wind-legend{
+    margin-top: 8px; font-size: 10.5px; color: var(--text-dim); line-height:1.5;
+  }
+
   /* Tips */
   .tips{
     margin-top: 18px;
@@ -277,17 +359,35 @@
 
   <div class="hilo-list" id="hilo-list"></div>
 
+  <section class="wind" id="wind-section">
+    <div class="wind-head">
+      <h3>Wind</h3>
+      <span class="units">mph · 10 m above ground</span>
+    </div>
+    <div class="seg" id="wind-seg">
+      <button data-win="am">Morning<small>7a–11a</small></button>
+      <button data-win="mid">Midday<small>11a–3p</small></button>
+      <button data-win="pm">Afternoon<small>3p–7p</small></button>
+    </div>
+    <div id="wind-summary"><div class="loading">Loading wind forecast…</div></div>
+    <div class="wind-strip-scroll"><div class="wind-strip" id="wind-strip"></div></div>
+    <div class="wind-legend">Arrows point the way the wind is <b>blowing toward</b>. Gold-edged hours are in the window above. Blue ring marks the current hour.</div>
+  </section>
+
   <div class="tips">
     <h3>Planning notes</h3>
     <p>For kayaking the tidal creeks around Kiawah, plan to launch on a rising tide and return near or after high slack — you'll ride the current out and avoid getting stuck on exposed mudflats at low water.</p>
     <p>For beach biking, low tide exposes the widest band of hard-packed sand — the two to three hours around low tide are usually easiest for riding.</p>
+    <p>For wind, ride the exposed coast with the wind at your back, then loop inland — trees and buildings take the edge off a headwind on the way home.</p>
   </div>
 
   <footer>
     Predictions from NOAA CO-OPS (tidesandcurrents.noaa.gov). Kiawah River Bridge (8667062) is a subordinate
     station, so times/heights are computed from the Charleston Harbor (8665530) reference curve using NOAA's
     published offset (+14 min / ×1.07 at high tide, +6 min / ×0.89 at low tide).<br>
-    Preliminary data, not verified for navigation. Cached for offline viewing after your first visit each day.
+    Preliminary data, not verified for navigation. Cached for offline viewing after your first visit each day.<br>
+    Wind forecast from <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0), a model forecast for the
+    Kiawah Island grid point — local gusts and sea breezes can differ.
   </footer>
 
 </div>
@@ -545,6 +645,8 @@
     const wrap = document.getElementById('chart-wrap');
     wrap.innerHTML = '<div class="loading" id="chart-status">Loading tide predictions…</div>';
 
+    renderWind(dp, isToday);   // independent of tides: one failing never hides the other
+
     try {
       const { hilo, curve } = await getDayData(dp);
       setOnlineBanner();
@@ -690,6 +792,237 @@
     svg += `</svg>`;
     wrap.innerHTML = svg;
   }
+
+  // ---------- wind ----------
+  // Open-Meteo is free, needs no API key, and allows direct browser requests.
+  // Location is a single constant now; a future location picker can swap it.
+  const WIND_LOC = { lat: 32.608, lon: -80.085, name: 'Kiawah Island' };
+  // Rough bearing of Kiawah's beach, running toward the NE end of the island.
+  const COAST_BEARING = 60;
+  const WIND_WINDOWS = {
+    am:  { start: 7,  end: 11 },
+    mid: { start: 11, end: 15 },
+    pm:  { start: 15, end: 19 }
+  };
+  const STRIP_FIRST_HOUR = 5, STRIP_LAST_HOUR = 21;
+  const CARDINALS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+
+  state.wind = null;       // { 'YYYY-MM-DD': [{h, speed, gust, dir}, ...] }
+  state.windAt = 0;
+  state.windSel = null;    // 'am' | 'mid' | 'pm' once chosen / auto-picked
+  state.windShownKey = null;
+
+  function cardinal(deg){
+    return CARDINALS[Math.round((((deg % 360) + 360) % 360) / 22.5) % 16];
+  }
+
+  function windUrl(){
+    const params = new URLSearchParams({
+      latitude: WIND_LOC.lat,
+      longitude: WIND_LOC.lon,
+      hourly: 'wind_speed_10m,wind_direction_10m,wind_gusts_10m',
+      wind_speed_unit: 'mph',
+      timezone: TZ,
+      past_days: 1,
+      forecast_days: 8
+    });
+    return 'https://api.open-meteo.com/v1/forecast?' + params.toString();
+  }
+
+  async function getWind(){
+    if (state.wind && Date.now() - state.windAt < 30 * 60000) return state.wind;
+    const res = await fetch(windUrl());
+    if (!res.ok) throw new Error('Wind service error ' + res.status);
+    const json = await res.json();
+    if (json.error || !json.hourly) throw new Error(json.reason || 'Wind service error');
+    const t = json.hourly.time;
+    const spd = json.hourly.wind_speed_10m;
+    const gst = json.hourly.wind_gusts_10m;
+    const dir = json.hourly.wind_direction_10m;
+    const byDate = {};
+    for (let i = 0; i < t.length; i++){
+      if (spd[i] == null || dir[i] == null) continue;
+      const [dayStr, timeStr] = t[i].split('T');
+      (byDate[dayStr] = byDate[dayStr] || []).push({
+        h: +timeStr.slice(0, 2),
+        speed: spd[i],
+        gust: gst[i] == null ? spd[i] : gst[i],
+        dir: dir[i]
+      });
+    }
+    state.wind = byDate;
+    state.windAt = Date.now();
+    return byDate;
+  }
+
+  function windDayKey(dp){ return `${dp.y}-${pad2(dp.m)}-${pad2(dp.d)}`; }
+
+  function speedClass(mph){
+    return mph < 10 ? 'w-calm' : (mph < 17 ? 'w-mod' : 'w-strong');
+  }
+
+  function arrowSvg(towardDeg){
+    return `<svg viewBox="-11 -11 22 22" aria-hidden="true"><g transform="rotate(${towardDeg.toFixed(0)})"><path d="M0,8 L0,-8 M-5,-3 L0,-8 L5,-3"/></g></svg>`;
+  }
+
+  // Speed-weighted vector average of the wind over a set of hours.
+  // Returns where the wind is blowing TOWARD (compass bearing), plus stats.
+  function summarizeWind(hours){
+    let ux = 0, uy = 0, sumSpeed = 0, maxGust = 0;
+    hours.forEach(r => {
+      const toward = (r.dir + 180) * Math.PI / 180;
+      ux += r.speed * Math.sin(toward);
+      uy += r.speed * Math.cos(toward);
+      sumSpeed += r.speed;
+      if (r.gust > maxGust) maxGust = r.gust;
+    });
+    const n = hours.length;
+    const avg = sumSpeed / n;
+    const mag = Math.sqrt(ux * ux + uy * uy) / n;   // mph of steady wind
+    const toward = ((Math.atan2(ux, uy) * 180 / Math.PI) + 360) % 360;
+    const steadiness = avg > 0 ? mag / avg : 0;      // 1 = one direction all window
+    return { avg, maxGust, toward, from: (toward + 180) % 360, steadiness };
+  }
+
+  function compassSvg(towardDeg){
+    let ticks = '';
+    [0, 90, 180, 270].forEach(a => {
+      const r = a * Math.PI / 180;
+      ticks += `<line class="tick" x1="${(Math.sin(r)*40).toFixed(1)}" y1="${(-Math.cos(r)*40).toFixed(1)}" x2="${(Math.sin(r)*46).toFixed(1)}" y2="${(-Math.cos(r)*46).toFixed(1)}"/>`;
+    });
+    return `<svg class="compass" viewBox="-64 -64 128 128" aria-hidden="true">
+      <circle class="ring" r="46"/>${ticks}
+      <text class="dir-label" x="0" y="-52" text-anchor="middle">N</text>
+      <text class="dir-label" x="54" y="3" text-anchor="middle">E</text>
+      <text class="dir-label" x="0" y="59" text-anchor="middle">S</text>
+      <text class="dir-label" x="-54" y="3" text-anchor="middle">W</text>
+      <g transform="rotate(${towardDeg.toFixed(0)})"><path class="arrow" d="M0,28 L0,-30 M-11,-17 L0,-30 L11,-17"/></g>
+    </svg>`;
+  }
+
+  function pickDefaultWindow(isToday){
+    if (!isToday) return 'am';
+    const h = easternParts(new Date()).hh;
+    return h < 11 ? 'am' : (h < 15 ? 'mid' : 'pm');
+  }
+
+  function renderWindSummary(rows, isToday){
+    const box = document.getElementById('wind-summary');
+    const win = WIND_WINDOWS[state.windSel];
+    const hours = rows.filter(r => r.h >= win.start && r.h < win.end);
+    if (!hours.length){
+      box.innerHTML = '<div class="loading">No wind data for this window.</div>';
+      return;
+    }
+    const s = summarizeWind(hours);
+    // Component of the wind along the beach axis (+ = toward the NE end).
+    const diff = (s.toward - COAST_BEARING) * Math.PI / 180;
+    const alongNE = s.avg * s.steadiness * Math.cos(diff);
+    const tailEnd = alongNE >= 0 ? 'NE' : 'SW';
+    const backEnd = alongNE >= 0 ? 'SW' : 'NE';
+    const alongMph = Math.abs(alongNE);
+
+    let note = '';
+    if (s.steadiness < 0.5){
+      note = 'Wind direction shifts during this window — check the hourly arrows below.';
+    } else if (s.maxGust >= 25){
+      note = 'Gusty — expect a rough ride and choppy water.';
+    } else if (s.avg >= 15){
+      note = 'Strong wind — the inland return will feel much better.';
+    }
+
+    const beachLine = alongMph < 3
+      ? 'Wind is mostly <b>across</b> the beach, so neither direction gets a big push.'
+      : `Along the beach: tailwind heading <b>${tailEnd}</b> (about ${alongMph.toFixed(0)} mph push). Heading ${backEnd} is into it — go inland for that leg.`;
+
+    box.innerHTML = `
+      <div class="wind-summary">
+        ${compassSvg(s.toward)}
+        <div class="wind-text">
+          <div class="big">From <span>${cardinal(s.from)}</span> · ${s.avg.toFixed(0)} mph</div>
+          Gusts to <b>${s.maxGust.toFixed(0)} mph</b> · blowing toward ${cardinal(s.toward)}<br>
+          Tailwind compass heading: <b>${cardinal(s.toward)}</b> (${s.toward.toFixed(0)}°)<br>
+          ${beachLine}
+          ${note ? `<div class="note">${note}</div>` : ''}
+        </div>
+      </div>`;
+  }
+
+  function renderWindStrip(rows, isToday, recenter){
+    const strip = document.getElementById('wind-strip');
+    const win = WIND_WINDOWS[state.windSel];
+    const nowH = isToday ? easternParts(new Date()).hh : -1;
+    strip.innerHTML = '';
+    rows.filter(r => r.h >= STRIP_FIRST_HOUR && r.h <= STRIP_LAST_HOUR).forEach(r => {
+      const toward = (r.dir + 180) % 360;
+      const cell = document.createElement('div');
+      cell.className = 'wcell ' + speedClass(r.speed) +
+        (r.h >= win.start && r.h < win.end ? ' in-window' : '') +
+        (r.h === nowH ? ' now' : '');
+      const hh12 = r.h % 12 === 0 ? 12 : r.h % 12;
+      cell.title = `${hh12}${r.h >= 12 ? 'PM' : 'AM'}: from ${cardinal(r.dir)} (${r.dir.toFixed(0)}°), ${r.speed.toFixed(0)} mph, gusts ${r.gust.toFixed(0)}`;
+      cell.innerHTML = `
+        <div class="wt">${hh12}${r.h >= 12 ? 'p' : 'a'}</div>
+        ${arrowSvg(toward)}
+        <div class="ws">${r.speed.toFixed(0)}</div>
+        <div class="wg">g${r.gust.toFixed(0)}</div>`;
+      strip.appendChild(cell);
+    });
+    // Only re-center when the day or window changed, so the once-a-minute
+    // refresh doesn't fight with the person scrolling the strip.
+    if (recenter){
+      const target = strip.querySelector('.now') || strip.querySelector('.in-window');
+      const scroller = strip.parentElement;
+      if (target){
+        scroller.scrollLeft = target.offsetLeft - scroller.clientWidth / 2 + target.offsetWidth / 2;
+      }
+    }
+  }
+
+  function updateSegButtons(){
+    document.querySelectorAll('#wind-seg button').forEach(b => {
+      b.classList.toggle('active', b.dataset.win === state.windSel);
+    });
+  }
+
+  async function renderWind(dp, isToday){
+    const key = windDayKey(dp);
+    const summary = document.getElementById('wind-summary');
+    if (state.windShownKey !== key){
+      summary.innerHTML = '<div class="loading">Loading wind forecast…</div>';
+      document.getElementById('wind-strip').innerHTML = '';
+    }
+    try {
+      const byDate = await getWind();
+      // ignore if the user already moved to another day while we waited
+      if (windDayKey(addDaysToAnchor(todayAnchor(), state.offset)) !== key) return;
+      const rows = (byDate[key] || []).slice().sort((a, b) => a.h - b.h);
+      if (!rows.length){
+        summary.innerHTML = '<div class="loading">No wind data for this day.</div>';
+        document.getElementById('wind-strip').innerHTML = '';
+        return;
+      }
+      if (!state.windSel) state.windSel = pickDefaultWindow(isToday);
+      updateSegButtons();
+      const recenter = state.windShownKey !== key;
+      renderWindSummary(rows, isToday);
+      renderWindStrip(rows, isToday, recenter);
+      state.windShownKey = key;
+    } catch (err){
+      summary.innerHTML = `<div class="error-msg">Couldn't load wind${navigator.onLine ? '' : ' (offline, and no cached copy)'}.<br>${err.message}</div>`;
+      document.getElementById('wind-strip').innerHTML = '';
+    }
+  }
+
+  document.getElementById('wind-seg').addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    state.windSel = btn.dataset.win;
+    state.windShownKey = null;
+    const anchor = todayAnchor();
+    const dp = addDaysToAnchor(anchor, state.offset);
+    renderWind(dp, sameDate(dp, anchor));
+  });
 
   // ---------- init ----------
   document.getElementById('prev-btn').addEventListener('click', () => selectOffset(state.offset - 1));

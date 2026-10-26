@@ -1,7 +1,7 @@
 // Kiawah Tides service worker
 // Bump this version whenever index.html/app shell changes to force a refresh.
-const SHELL_CACHE = 'kiawah-tides-shell-v1';
-const DATA_CACHE = 'kiawah-tides-data-v1';
+const SHELL_CACHE = 'kiawah-tides-shell-v2';
+const DATA_CACHE = 'kiawah-tides-data-v2';
 
 const SHELL_FILES = [
   './',
@@ -34,11 +34,12 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  const isTideApi =
+  const isDataApi =
     url.hostname === 'api.tidesandcurrents.noaa.gov' ||
-    url.hostname === 'api.allorigins.win';
+    url.hostname === 'api.allorigins.win' ||
+    url.hostname === 'api.open-meteo.com';
 
-  if (isTideApi) {
+  if (isDataApi) {
     // Network-first, fall back to cache so previously viewed days work offline.
     event.respondWith(
       fetch(event.request)
