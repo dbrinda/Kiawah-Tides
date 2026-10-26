@@ -190,6 +190,12 @@
   .tcol .tl{ font-size:12.5px; color: var(--text-dim); font-weight:500; letter-spacing:0.03em; }
   .tcol svg.wx{ width:32px; height:32px; color: var(--text); }
   .tcol .tv{ font-family:'Oswald',sans-serif; font-size:21px; color: var(--text); }
+  .tcol .tp{ display:flex; align-items:center; gap:3px; font-size:11.5px; color: var(--text-dim); margin-top:-3px; }
+  .tcol .tp.wet{ color: var(--water); font-weight:600; }
+  svg.drop{ width:11px; height:11px; fill: currentColor; stroke:none; flex-shrink:0; }
+  .rain-line{ margin-top:12px; font-size:12px; color: var(--text-dim); display:flex; align-items:center; gap:6px; }
+  .rain-line svg.drop{ width:13px; height:13px; color: var(--water); }
+  .rain-line b{ color: var(--water); font-weight:600; }
   .tcol.now .tl, .tcol.now .tv{ color: var(--gold); }
   .tcol.now .tl{ font-weight:600; }
 
@@ -351,7 +357,9 @@
     background: var(--card-2); border:1px solid var(--line); color: var(--gold);
     border-radius: 10px; padding: 10px;
     font-family:'IBM Plex Mono', monospace; font-size: 12.5px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
   }
+  .wind-map-btn .btn-ico{ width:20px; height:20px; flex-shrink:0; }
   .wind-map-btn:active{ background: var(--card); }
   .wind-map-box{ display:none; margin-top: 12px; }
   .wind-map-box.show{ display:block; }
@@ -519,6 +527,7 @@
         <span class="sec-note" id="temp-hl"></span>
       </div>
       <div class="temp-row" id="temp-row"><div class="loading" style="width:100%;padding:18px 0">Loading…</div></div>
+      <div class="rain-line" id="rain-line" hidden></div>
     </section>
 
     <section id="tides-section">
@@ -549,7 +558,7 @@
       <div id="wind-summary"><div class="loading">Loading wind forecast…</div></div>
       <div class="wind-strip-scroll"><div class="wind-strip" id="wind-strip"></div></div>
       <div class="wind-legend">Swipe the hours sideways. Arrows point the way the wind is <b>blowing toward</b>. Gold-edged hours are in the window above. Blue ring marks the current hour.</div>
-      <button class="wind-map-btn" id="wind-map-btn" type="button">🌬️ Show animated wind map</button>
+      <button class="wind-map-btn" id="wind-map-btn" type="button"><svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15 21L9 18.9L4.35 20.7C4.01667 20.8333 3.70833 20.796 3.425 20.588C3.14167 20.38 3 20.1007 3 19.75V5.75C3 5.53333 3.06267 5.34167 3.188 5.175C3.31333 5.00833 3.484 4.88333 3.7 4.8L9 3L15 5.1L19.65 3.3C19.9833 3.16667 20.2917 3.20433 20.575 3.413C20.8583 3.62167 21 3.90067 21 4.25V18.25C21 18.4667 20.9377 18.6583 20.813 18.825C20.6883 18.9917 20.5173 19.1167 20.3 19.2L15 21ZM14 18.55V6.85L10 5.45V17.15L14 18.55ZM16 18.55L19 17.55V5.7L16 6.85V18.55ZM5 18.3L8 17.15V5.45L5 6.45V18.3Z"/></svg><span id="wind-map-label">Show animated wind map</span></button>
       <div class="wind-map-box" id="wind-map-box"></div>
     </section>
 
@@ -786,6 +795,7 @@
     if (code >= 95) return { key:'storm', label:'Stormy' };
     return { key:'cloud', label:'Cloudy' };
   }
+  const DROP = '<svg class="drop" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.7c3.7 4.3 6.2 7.5 6.2 10.9a6.2 6.2 0 0 1-12.4 0C5.8 10.2 8.3 7 12 2.7z"/></svg>';
   function wxIcon(code, isDay){
     const info = wxInfo(code, isDay);
     return `<svg class="wx" viewBox="0 0 24 24" aria-hidden="true">${WX[info.key]}</svg>`;
@@ -798,10 +808,11 @@
     const q = new URLSearchParams({
       latitude: p.lat,
       longitude: p.lon,
-      hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
-      daily: 'temperature_2m_max,temperature_2m_min',
+      hourly: 'temperature_2m,weather_code,is_day,precipitation_probability,precipitation,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
+      daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum',
       current: 'temperature_2m,weather_code,is_day',
       temperature_unit: 'fahrenheit',
+      precipitation_unit: 'inch',
       wind_speed_unit: 'mph',
       timezone: 'auto',
       past_days: 1,
@@ -821,6 +832,8 @@
         temp: h.temperature_2m ? h.temperature_2m[i] : null,
         code: h.weather_code ? h.weather_code[i] : null,
         isDay: h.is_day ? h.is_day[i] === 1 : true,
+        pop: h.precipitation_probability ? h.precipitation_probability[i] : null,
+        rain: h.precipitation ? h.precipitation[i] : null,
         speed: h.wind_speed_10m ? h.wind_speed_10m[i] : null,
         gust: h.wind_gusts_10m ? h.wind_gusts_10m[i] : null,
         dir: h.wind_direction_10m ? h.wind_direction_10m[i] : null
@@ -835,7 +848,11 @@
     const daily = {};
     if (json.daily && json.daily.time){
       json.daily.time.forEach((d, i) => {
-        daily[d] = { hi: json.daily.temperature_2m_max[i], lo: json.daily.temperature_2m_min[i] };
+        daily[d] = {
+          hi: json.daily.temperature_2m_max[i], lo: json.daily.temperature_2m_min[i],
+          pop: json.daily.precipitation_probability_max ? json.daily.precipitation_probability_max[i] : null,
+          rain: json.daily.precipitation_sum ? json.daily.precipitation_sum[i] : null
+        };
       });
     }
     const c = json.current;
@@ -1234,6 +1251,7 @@
             temp: i === 0 && fc.current && fc.current.temp != null ? fc.current.temp : r.temp,
             code: i === 0 && fc.current && fc.current.code != null ? fc.current.code : r.code,
             isDay: i === 0 && fc.current ? fc.current.isDay : r.isDay,
+            pop: r.pop,
             now: i === 0
           }));
         }
@@ -1242,7 +1260,7 @@
         items = [8, 10, 12, 14, 16, 18, 20]
           .map(h => fc.rows.find(r => r.date === key && r.h === h))
           .filter(Boolean)
-          .map(r => ({ label: hourLabel(r.h), temp: r.temp, code: r.code, isDay: r.isDay, now: false }));
+          .map(r => ({ label: hourLabel(r.h), temp: r.temp, code: r.code, isDay: r.isDay, pop: r.pop, now: false }));
       }
       if (!items.length){ box.innerHTML = '<div class="loading" style="width:100%;padding:18px 0">No temperature data for this day.</div>'; }
       else box.innerHTML = items.map(it => `
@@ -1250,13 +1268,23 @@
           <div class="tl">${it.label}</div>
           ${wxIcon(it.code, it.isDay)}
           <div class="tv">${it.temp == null ? '—' : Math.round(it.temp) + '°'}</div>
+          ${it.pop == null ? '' : `<div class="tp${it.pop >= 20 ? ' wet' : ''}">${DROP}${Math.round(it.pop)}%</div>`}
         </div>`).join('');
       const d = fc.daily[key];
       $('temp-hl').textContent = d ? `H: ${Math.round(d.hi)}°  L: ${Math.round(d.lo)}°` : '';
+      const rl = $('rain-line');
+      if (d && d.pop != null){
+        const when = isToday ? 'today' : 'this day';
+        rl.innerHTML = DROP + '<span>' + (d.pop < 10
+          ? `No rain expected ${when}.`
+          : `Rain ${when}: up to <b>${Math.round(d.pop)}%</b> chance` + (d.rain != null && d.rain >= 0.01 ? ` · about <b>${d.rain.toFixed(2)} in</b>` : '') + '.') + '</span>';
+        rl.hidden = false;
+      } else { rl.hidden = true; }
     } catch (err){
       if (loc().id !== p.id) return;
       box.innerHTML = `<div class="error-msg" style="width:100%;padding:18px 0">Couldn't load temperatures${navigator.onLine ? '' : ' (offline)'}.</div>`;
       $('temp-hl').textContent = '';
+      $('rain-line').hidden = true;
     }
   }
 
@@ -1631,7 +1659,7 @@
   function resetWindMap(){
     $('wind-map-box').innerHTML = '';
     $('wind-map-box').classList.remove('show');
-    $('wind-map-btn').textContent = '🌬️ Show animated wind map';
+    $('wind-map-label').textContent = 'Show animated wind map';
   }
 
   // =====================================================================
@@ -1961,7 +1989,7 @@
     const box = $('wind-map-box');
     const btn = $('wind-map-btn');
     const open = box.classList.toggle('show');
-    btn.textContent = open ? 'Hide wind map' : '🌬️ Show animated wind map';
+    $('wind-map-label').textContent = open ? 'Hide wind map' : 'Show animated wind map';
     if (open && !box.firstChild){
       if (!navigator.onLine){
         box.innerHTML = '<div class="error-msg">The wind map needs an internet connection.</div>';
