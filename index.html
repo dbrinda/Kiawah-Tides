@@ -66,7 +66,7 @@
   .app-head{
     position:relative;
     display:flex; align-items:flex-start; gap:12px;
-    padding: 12px 2px 8px 2px;
+    padding: 30px 2px 8px 2px;
   }
   .app-head.compact{ align-items:center; }
   .logo{
@@ -185,8 +185,15 @@
   svg.wx{ fill:none; stroke: currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
 
   /* Temp */
-  .temp-row{ display:flex; justify-content:space-between; gap:2px; margin-top: 6px; }
-  .tcol{ flex:1; min-width:0; text-align:center; display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .temp-scroll{
+    margin: 6px -16px 0; overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none;
+    -webkit-overflow-scrolling:touch;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 16px, #000 calc(100% - 22px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, #000 16px, #000 calc(100% - 22px), transparent 100%);
+  }
+  .temp-scroll::-webkit-scrollbar{ display:none; }
+  .temp-row{ display:flex; gap:2px; width:max-content; min-width:100%; padding: 0 16px; box-sizing:border-box; }
+  .tcol{ flex:0 0 52px; min-width:0; text-align:center; display:flex; flex-direction:column; align-items:center; gap:8px; }
   .tcol .tl{ font-size:12.5px; color: var(--text-dim); font-weight:500; letter-spacing:0.03em; }
   .tcol svg.wx{ width:32px; height:32px; color: var(--text); }
   .tcol .tv{ font-family:'Oswald',sans-serif; font-size:21px; color: var(--text); }
@@ -526,7 +533,7 @@
         <h2>Temp</h2>
         <span class="sec-note" id="temp-hl"></span>
       </div>
-      <div class="temp-row" id="temp-row"><div class="loading" style="width:100%;padding:18px 0">Loading…</div></div>
+      <div class="temp-scroll" id="temp-scroll"><div class="temp-row" id="temp-row"><div class="loading" style="width:100%;padding:18px 0">Loading…</div></div></div>
       <div class="rain-line" id="rain-line" hidden></div>
     </section>
 
@@ -1246,7 +1253,7 @@
         const nowH = tzParts(new Date(), p.tz).hh;
         const idx = fc.rows.findIndex(r => r.date === key && r.h === nowH);
         if (idx >= 0){
-          items = fc.rows.slice(idx, idx + 7).map((r, i) => ({
+          items = fc.rows.slice(idx, idx + 24).map((r, i) => ({
             label: i === 0 ? 'NOW' : hourLabel(r.h),
             temp: i === 0 && fc.current && fc.current.temp != null ? fc.current.temp : r.temp,
             code: i === 0 && fc.current && fc.current.code != null ? fc.current.code : r.code,
@@ -1257,7 +1264,7 @@
         }
       }
       if (!items.length){
-        items = [8, 10, 12, 14, 16, 18, 20]
+        items = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
           .map(h => fc.rows.find(r => r.date === key && r.h === h))
           .filter(Boolean)
           .map(r => ({ label: hourLabel(r.h), temp: r.temp, code: r.code, isDay: r.isDay, pop: r.pop, now: false }));
@@ -1270,6 +1277,7 @@
           <div class="tv">${it.temp == null ? '—' : Math.round(it.temp) + '°'}</div>
           ${it.pop == null ? '' : `<div class="tp${it.pop >= 20 ? ' wet' : ''}">${DROP}${Math.round(it.pop)}%</div>`}
         </div>`).join('');
+      $('temp-scroll').scrollLeft = 0;
       const d = fc.daily[key];
       $('temp-hl').textContent = d ? `H: ${Math.round(d.hi)}°  L: ${Math.round(d.lo)}°` : '';
       const rl = $('rain-line');
