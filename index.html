@@ -66,36 +66,38 @@
   .app-head{
     position:relative;
     display:flex; align-items:flex-start; gap:12px;
-    padding: 14px 2px 8px 2px;
+    padding: 12px 2px 8px 2px;
   }
+  .app-head.compact{ align-items:center; }
   .logo{
-    width:68px; height:68px; flex-shrink:0; border-radius:50%;
+    width:var(--logo, 96px); height:var(--logo, 96px); flex-shrink:0; border-radius:50%;
     display:block;
   }
   .head-text{ flex:1; min-width:0; }
   .eyebrow{
     font-family:'Oswald', sans-serif;
-    font-size: 10.5px; letter-spacing: 0.13em; text-transform: uppercase;
-    color: var(--gold); font-weight:500; white-space:nowrap;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--gold); font-weight:500; white-space:nowrap; overflow:hidden;
   }
   h1{
     font-size: 27px; font-weight:600; color: var(--text);
-    line-height:1.12; margin-top:2px; padding-right:50px;
+    line-height:1.12; margin-top:2px; padding-right:46px;
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
   }
   .station-line{
-    font-size: 11.5px; color: var(--text-dim); margin-top:4px; line-height:1.4;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px; color: var(--text-dim); margin-top:4px; line-height:1.35;
   }
   .loc-btn{
-    position:absolute; top:14px; right:2px;
-    width:44px; height:44px; border-radius:12px;
+    position:absolute; top:30px; right:2px;
+    width:38px; height:38px; border-radius:11px;
     background: rgba(38,73,86,0.35);
     border:1.5px solid var(--teal-line);
     color: var(--text);
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; padding:0;
   }
-  .loc-btn svg{ width:22px; height:22px; }
+  .loc-btn svg{ width:21px; height:21px; }
   .loc-btn:active{ background: rgba(38,73,86,0.7); }
   .loc-btn.active{ background: var(--teal); border-color: var(--text); }
 
@@ -480,10 +482,10 @@
 <body>
 <div class="app">
 
-  <header class="app-head">
-    <img class="logo" src="icons/logo.png" alt="Joyful Echo Adventures" width="68" height="68">
+  <header class="app-head" id="app-head">
+    <img class="logo" src="icons/logo.png" alt="Joyful Echo Adventures" width="96" height="96">
     <div class="head-text">
-      <div class="eyebrow">Field Conditions • Wind &amp; Tides</div>
+      <div class="eyebrow">Field Conditions • Temp, Tides &amp; Winds</div>
       <h1 id="title">Kiawah Island, SC</h1>
       <div class="station-line" id="station-line"></div>
     </div>
@@ -599,6 +601,11 @@
   const NOAA_STATIONS = 'https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json?type=tidepredictions&units=english';
   const METEO_API = 'https://api.open-meteo.com/v1/forecast';
   const GEO_API = 'https://geocoding-api.open-meteo.com/v1/search';
+  // Canadian tides: Canadian Hydrographic Service "IWLS" public API (free, official).
+  // Two hostnames are published for it; we try one then the other.
+  const CHS_HOSTS = ['https://api-iwls.dfo-mpo.gc.ca/api/v1', 'https://api-sine.dfo-mpo.gc.ca/api/v1'];
+  const NEAR_NOAA_MI = 20;       // a NOAA station this close wins without checking Canada
+  const M_TO_FT = 3.28084;
   const MAX_STATION_MI = 50;     // farthest NOAA tide station we'll borrow for a place
   const FC_TTL = 30 * 60000;     // re-fetch forecasts after 30 minutes
   const MIN_OFFSET = -7;
@@ -677,7 +684,9 @@
     offset: 0,
     dataCache: {},        // stationId:date -> {hilo, curve}
     fc: {},               // presetId -> forecast
-    stations: null,       // [[id,name,state,lat,lng], ...]
+    stations: null,       // NOAA: [[id,name,state,lat,lng], ...]
+    chsStations: null,    // CHS: [[id,name,prov,lat,lng,code], ...]
+    chsHost: 0,
     windSel: null,
     windShownKey: null,
     tideShownKey: null
@@ -925,26 +934,70 @@
     const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1*rad) * Math.cos(lat2*rad) * Math.sin(dLon/2) ** 2;
     return 2 * R * Math.asin(Math.sqrt(a));
   }
-  // returns {id,name,distMi} or null when nothing is close enough
-  async function resolveTide(p){
-    if (p.tide) return p.tide.none ? null : p.tide;
-    const list = await getStations();
+  async function fetchChs(path){
+    let lastErr;
+    for (let i = 0; i < CHS_HOSTS.length; i++){
+      const idx = (state.chsHost + i) % CHS_HOSTS.length;
+      try {
+        const data = await fetchJson(CHS_HOSTS[idx] + path);
+        state.chsHost = idx;
+        return data;
+      } catch (err){ lastErr = err; }
+    }
+    throw lastErr;
+  }
+  async function getChsStations(){
+    if (state.chsStations) return state.chsStations;
+    const cached = store.get('kt.chs.v1', null);
+    if (cached && cached.list && cached.list.length && Date.now() - cached.at < 30 * 86400000){
+      state.chsStations = cached.list;
+      return state.chsStations;
+    }
+    const j = await fetchChs('/stations');
+    const arr = Array.isArray(j) ? j : (j.stations || []);
+    const hasSeries = arr.some(s => s && Array.isArray(s.timeSeries) && s.timeSeries.length);
+    const list = arr
+      .filter(s => s && s.id && isFinite(+s.latitude) && isFinite(+s.longitude) && s.isTidal !== false &&
+                   (!hasSeries || (Array.isArray(s.timeSeries) && s.timeSeries.some(t => t && t.code === 'wlp-hilo'))))
+      .map(s => [String(s.id), s.officialName || '', s.provinceCode || '', +s.latitude, +s.longitude, s.code || '']);
+    if (!list.length) throw new Error('Canadian tide station list unavailable');
+    store.set('kt.chs.v1', { at: Date.now(), list });
+    state.chsStations = list;
+    return list;
+  }
+  function nearestIn(list, p){
     let best = null;
     for (const s of list){
       const d = haversineMi(p.lat, p.lon, s[3], s[4]);
       if (!best || d < best.d) best = { s, d };
     }
-    if (best && best.d <= MAX_STATION_MI){
-      p.tide = {
-        id: best.s[0],
-        name: best.s[1] + (best.s[2] ? ', ' + best.s[2] : ''),
-        distMi: Math.round(best.d)
-      };
-    } else {
-      p.tide = { none: true };
+    return best;
+  }
+  // returns {id,name,distMi,provider} or null when nothing is close enough.
+  // NOAA covers US waters, CHS covers Canada; the closer station wins.
+  async function resolveTide(p){
+    if (p.tide) return p.tide.none ? null : p.tide;
+    const noaaBest = nearestIn(await getStations(), p);
+    let chsBest = null, chsErr = null;
+    if (!noaaBest || noaaBest.d > NEAR_NOAA_MI){
+      try { chsBest = nearestIn(await getChsStations(), p); } catch (e){ chsErr = e; }
     }
+    let pick = null;
+    if (noaaBest && noaaBest.d <= MAX_STATION_MI){
+      pick = { provider: 'noaa', id: noaaBest.s[0],
+               name: noaaBest.s[1] + (noaaBest.s[2] ? ', ' + noaaBest.s[2] : ''),
+               distMi: Math.round(noaaBest.d) };
+    }
+    if (chsBest && chsBest.d <= MAX_STATION_MI && (!pick || chsBest.d < noaaBest.d)){
+      pick = { provider: 'chs', id: chsBest.s[0], code: chsBest.s[5],
+               name: chsBest.s[1] + (chsBest.s[2] ? ', ' + chsBest.s[2] : ''),
+               distMi: Math.round(chsBest.d) };
+    }
+    // couldn't check Canada and nothing US is near: don't cache a false "none"
+    if (!pick && chsErr) throw chsErr;
+    p.tide = pick || { none: true };
     savePresets();
-    return p.tide.none ? null : p.tide;
+    return pick;
   }
 
   // ---- raw NOAA points -> minutes since the window's first midnight ----
@@ -1025,7 +1078,30 @@
 
     let extrema, curve;
     const sub = SUBORDINATE[src.id];
-    if (sub){
+    if (src.provider === 'chs'){
+      // CHS publishes high/low predictions (metres above chart datum, UTC times).
+      const tz = curTZ();
+      const fromD = new Date(Date.UTC(windowStart.y, windowStart.m - 1, windowStart.d) - 14 * 3600000);
+      const toD = new Date(Date.UTC(windowEnd.y, windowEnd.m - 1, windowEnd.d + 1) + 14 * 3600000);
+      const iso = d => d.toISOString().replace(/\.\d{3}Z$/, 'Z');
+      const j = await fetchChs(`/stations/${encodeURIComponent(src.id)}/data?time-series-code=wlp-hilo&from=${iso(fromD)}&to=${iso(toD)}`);
+      const pts = (Array.isArray(j) ? j : [])
+        .filter(x => x && x.eventDate && isFinite(+x.value))
+        .map(x => ({ t: new Date(x.eventDate), v: +x.value * M_TO_FT }))
+        .sort((a, b) => a.t - b.t);
+      extrema = pts.map((pt, i) => {
+        const prev = pts[i - 1], next = pts[i + 1];
+        let type;
+        if (prev && next) type = (pt.v > prev.v && pt.v > next.v) ? 'H' : (pt.v < prev.v && pt.v < next.v ? 'L' : (pt.v >= prev.v ? 'H' : 'L'));
+        else if (prev) type = pt.v > prev.v ? 'H' : 'L';
+        else if (next) type = pt.v > next.v ? 'H' : 'L';
+        else type = 'H';
+        const lp = tzParts(pt.t, tz);
+        const dayDiff = Math.round((Date.UTC(lp.y, lp.m - 1, lp.d) - Date.UTC(windowStart.y, windowStart.m - 1, windowStart.d)) / 86400000);
+        return { minutes: dayDiff * 1440 + lp.hh * 60 + lp.mm, v: pt.v, type };
+      });
+      curve = synthCurve(extrema);
+    } else if (sub){
       const [hiloJson, curveJson] = await Promise.all([
         fetchJson(buildUrl(sub.ref, beginStr, endStr, true)),
         fetchJson(buildUrl(sub.ref, beginStr, endStr, false))
@@ -1064,10 +1140,33 @@
   // =====================================================================
   //  Rendering: header, chips
   // =====================================================================
-  function setStationLine(text){ $('station-line').textContent = text || ''; }
+  // Make the round logo as tall as the header's text block (clamped), so it
+  // fills the header height whatever the title/station line wrap to.
+  function fitEyebrow(){
+    const el = document.querySelector('.eyebrow');
+    if (!el || el.offsetParent === null) return;
+    el.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(el).fontSize);
+    while (el.scrollWidth > el.clientWidth + 0.5 && size > 7.5){
+      size -= 0.5;
+      el.style.fontSize = size + 'px';
+    }
+  }
+  function fitLogo(){
+    const head = $('app-head'), text = document.querySelector('.head-text');
+    if (!head || !text || head.offsetParent === null) return;
+    fitEyebrow();
+    const h = Math.max(72, Math.min(112, Math.round(text.getBoundingClientRect().height)));
+    if (Math.abs(h - (parseFloat(head.style.getPropertyValue('--logo')) || 0)) >= 2){
+      head.style.setProperty('--logo', h + 'px');
+    }
+  }
+  function fitLogoSoon(){ fitLogo(); requestAnimationFrame(fitLogo); }
+  function setStationLine(text){ $('station-line').textContent = text || ''; fitLogoSoon(); }
 
   function stationText(p, src){
-    if (!src) return `No NOAA tide station within ${MAX_STATION_MI} mi`;
+    if (!src) return `No tide station within ${MAX_STATION_MI} mi`;
+    if (src.provider === 'chs') return `${src.name} • CHS Station ${src.code || ''}` + (src.distMi >= 3 ? ` • ${src.distMi} mi away` : '');
     const sub = SUBORDINATE[src.id];
     if (sub) return `${src.name} • Station ${src.id} • Computed from ${sub.refName} (${sub.ref}) using NOAA's published offsets`;
     return `${src.name} • Station ${src.id}` + (src.distMi >= 3 ? ` • ${src.distMi} mi away` : '');
@@ -1078,6 +1177,8 @@
     $('title').textContent = inLoc ? 'Choose Location' : loc().name;
     $('station-line').hidden = inLoc;
     $('loc-btn').classList.toggle('active', inLoc);
+    $('app-head').classList.toggle('compact', inLoc);
+    fitLogoSoon();
     $('loc-btn').setAttribute('aria-label', inLoc ? 'Back to conditions' : 'Choose location');
   }
 
@@ -1288,10 +1389,12 @@
       el.innerHTML = `Predictions from NOAA CO-OPS (tidesandcurrents.noaa.gov). ${esc(src.name)} (${esc(src.id)}) is a subordinate
         station, so times/heights are computed from the ${esc(sub.refName)} (${esc(sub.ref)}) reference curve using NOAA's
         published offset (+${sub.offset.H.minutes} min / ×${sub.offset.H.ratio} at high tide, +${sub.offset.L.minutes} min / ×${sub.offset.L.ratio} at low tide).`;
+    } else if (src && src.provider === 'chs'){
+      el.innerHTML = `Tide predictions from the <a href="https://tides.gc.ca/">Canadian Hydrographic Service</a> (Fisheries and Oceans Canada), station ${esc(src.code || src.id)}${src.distMi >= 3 ? ` — about ${src.distMi} mi from this location, so local times and heights can differ` : ''}. Heights are above chart datum, shown in feet.`;
     } else if (src){
       el.textContent = `Tide predictions from NOAA CO-OPS (tidesandcurrents.noaa.gov), station ${src.id}${src.distMi >= 3 ? ` — about ${src.distMi} mi from this location, so local times and heights can differ` : ''}.`;
     } else {
-      el.textContent = 'Tide predictions come from NOAA CO-OPS, which covers US waters only.';
+      el.textContent = 'Tide predictions come from NOAA CO-OPS (US waters) and the Canadian Hydrographic Service (Canada).';
     }
   }
 
@@ -1321,7 +1424,7 @@
     updateTideFooter(src);
 
     if (!src){
-      wrap.innerHTML = `<div class="loading">No NOAA tide station within ${MAX_STATION_MI} mi of ${esc(p.name)}.<br>NOAA tide predictions cover US waters only.</div>`;
+      wrap.innerHTML = `<div class="loading">No tide station within ${MAX_STATION_MI} mi of ${esc(p.name)}.<br>Tide predictions cover US (NOAA) and Canadian (CHS) waters.</div>`;
       $('hilo-list').innerHTML = '';
       $('now-readout').textContent = '';
       state.tideShownKey = key;
@@ -1877,6 +1980,8 @@
   $('next-btn').addEventListener('click', () => selectOffset(state.offset + 1));
   window.addEventListener('online', () => { setOnlineBanner(); if (state.view === 'main') loadAndRender(); });
   window.addEventListener('offline', setOnlineBanner);
+  window.addEventListener('resize', fitLogoSoon);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLogoSoon);
 
   renderHeader();
   setOnlineBanner();
